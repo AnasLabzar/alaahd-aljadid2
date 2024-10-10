@@ -28,7 +28,7 @@ const AddProduct: React.FC = () => {
     // Fetch unique colors
     const fetchUniqueColors = async () => {
         try {
-            const response = await axios.get('https://backendalaahd.onrender.com/api/colors');
+            const response = await axios.get('http://localhost:3000/api/colors');
             const colors = response.data;
             const uniqueColorsMap = new Map();
 
@@ -66,7 +66,7 @@ const AddProduct: React.FC = () => {
     // Fetch categories
     const fetchCategories = async () => {
         try {
-            const response = await axios.get('https://backendalaahd.onrender.com/api/categories');
+            const response = await axios.get('http://localhost:3000/api/categories');
             const categories = response.data.map(category => ({
                 value: category._id,
                 label: category.title,

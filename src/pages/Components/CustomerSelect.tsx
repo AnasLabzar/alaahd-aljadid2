@@ -8,7 +8,7 @@ const CustomerSelect = ({ onCustomerChange }) => {
   useEffect(() => {
     const fetchCustomers = async () => {
       try {
-        const response = await axios.get('https://backendalaahd.onrender.com/api/users'); // Fetch all users
+        const response = await axios.get('http://localhost:3000/api/users'); // Fetch all users
         const customRoleUsers = response.data.filter(user => user.role === 'custom'); // Filter by role 'custom'
         setCustomers(customRoleUsers); // Set the filtered users
       } catch (error) {
