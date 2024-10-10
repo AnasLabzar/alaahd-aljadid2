@@ -73,7 +73,7 @@ const Add = () => {
     useEffect(() => {
         const fetchProducts = async () => {
             try {
-                const response = await axios.get('http://localhost:3000/api/products');
+                const response = await axios.get('https://backendalaahd.onrender.com/api/products');
                 setProducts(response.data);
             } catch (error) {
                 console.error("Error fetching products:", error);
@@ -82,7 +82,7 @@ const Add = () => {
 
         const fetchColors = async () => {
             try {
-                const response = await axios.get('http://localhost:3000/api/colors');
+                const response = await axios.get('https://backendalaahd.onrender.com/api/colors');
                 setColors(response.data);
             } catch (error) {
                 console.error("Error fetching Colors:", error);
@@ -128,7 +128,7 @@ const Add = () => {
 
     const fetchProductPrice = async (productPriceId: string): Promise<number> => {
         try {
-            const response = await fetch(`http://localhost:3000/api/prices/${productPriceId}`);
+            const response = await fetch(`https://backendalaahd.onrender.com/api/prices/${productPriceId}`);
             if (!response.ok) {
                 throw new Error('Failed to fetch price details');
             }
