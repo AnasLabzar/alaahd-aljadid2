@@ -1,0 +1,8 @@
+### Log in as the user created above
+GET http://localhost:3000/api/users
+Content-Type: application/json
+
+{
+  "email": "adminuser@example.com",
+  "password": "password123"
+}
