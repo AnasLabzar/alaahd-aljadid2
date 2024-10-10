@@ -56,7 +56,7 @@ const Index = () => {
     const fetchInvoiceCount = async (filter: string) => {
         setLoading(true);
         try {
-            const response = await axios.get(`https://backendalaahd.onrender.com/api/invoices/count`, { params: { filter } });
+            const response = await axios.get(`http://localhost:3000/api/invoices/count`, { params: { filter } });
             setInvoiceCount(response.data.count);
 
             // Assuming response.data.count gives you the count of invoices for the time filter

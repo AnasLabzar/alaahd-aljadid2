@@ -73,7 +73,7 @@ const List = () => {
 
     const fetchInvoices = async () => {
         try {
-            const response = await axios.get('https://backendalaahd.onrender.com/api/invoices');
+            const response = await axios.get('http://localhost:3000/api/invoices');
             const fetchedItems = response.data;
 
             setItems(fetchedItems);
@@ -92,7 +92,7 @@ const List = () => {
         const customerIds = [...new Set(invoices.map((invoice) => invoice.customerId))];
         try {
             const userRequests = customerIds.map(async (customerId) => {
-                const response = await axios.get(`https://backendalaahd.onrender.com/api/users/${customerId}`);
+                const response = await axios.get(`http://localhost:3000/api/users/${customerId}`);
                 return { customerId, username: response.data.username, userType: response.data.userType };
             });
             const usersData = await Promise.all(userRequests);
@@ -112,7 +112,7 @@ const List = () => {
 
     const deleteRow = async (id: string) => {
         try {
-            await axios.delete(`https://backendalaahd.onrender.com/api/invoices/${id}`);
+            await axios.delete(`http://localhost:3000/api/invoices/${id}`);
             fetchInvoices(); // Refresh the list after deletion
         } catch (error) {
             console.error('Error deleting invoice:', error);
