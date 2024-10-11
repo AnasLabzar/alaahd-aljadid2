@@ -42,16 +42,16 @@ const ListProduct = () => {
       try {
         const response = await axios.get("https://backendalaahd.onrender.com/api/products");
         const allProducts = response.data;
-    
+
         if (!Array.isArray(allProducts) || allProducts.length === 0) {
           console.warn("No products found.");
           setProducts([]); // Clear products in state
           return;
         }
-    
+
         setTotalRows(allProducts.length);
         const paginatedProducts = allProducts.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
-        
+
         // Fetch price data
         const pricePromises = paginatedProducts.map((product: Package) => {
           if (!product.priceId) {
@@ -60,7 +60,7 @@ const ListProduct = () => {
           }
           return axios.get(`https://backendalaahd.onrender.com/api/prices/${product.priceId}`);
         });
-    
+
         // Fetch color data
         const colorPromises = paginatedProducts.map((product: Package) => {
           if (!Array.isArray(product.colorsId) || product.colorsId.length === 0) {
@@ -69,28 +69,33 @@ const ListProduct = () => {
           }
           return axios.get(`https://backendalaahd.onrender.com/api/colors/${product.colorsId}`);
         });
-    
+
         // Resolve all promises
         const [priceResponses, colorResponses] = await Promise.all([
           Promise.all(pricePromises),
           Promise.all(colorPromises),
         ]);
-    
+
         // Filter out null responses
         const validPriceResponses = priceResponses.filter(res => res !== null);
         const validColorResponses = colorResponses.filter(res => res !== null);
-    
+
         // Map the price and color data
         const priceData = validPriceResponses.reduce((acc: { [key: string]: Price }, res) => {
-          acc[res.data._id] = res.data;
+          if (res) { // Check if res is not null
+            acc[res.data._id] = res.data;
+          }
           return acc;
         }, {});
-    
+
         const colorData = validColorResponses.reduce((acc: { [key: string]: Color }, res) => {
-          acc[res.data._id] = res.data;
+          if (res) { // Check if res is not null
+            acc[res.data._id] = res.data;
+          }
           return acc;
         }, {});
-    
+
+
         // Update the state with fetched data
         setProducts(paginatedProducts);
         setPrices(priceData);
@@ -99,8 +104,8 @@ const ListProduct = () => {
         console.error("Error fetching products, prices, or colors:", error);
       }
     };
-    
-    
+
+
 
     fetchProducts();
   }, [currentPage]); // Re-run the effect when currentPage changes
