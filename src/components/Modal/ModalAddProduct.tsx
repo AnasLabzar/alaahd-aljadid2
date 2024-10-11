@@ -25,6 +25,12 @@ interface Color {
     refColor: string;   // or whatever type refColor should be
 }
 
+
+interface CategoryResponse {
+    _id: string;
+    title: string;
+}
+
 // Define Category interface
 interface Category {
     value: string;
@@ -33,14 +39,15 @@ interface Category {
 
 // Define Selected Color interface
 interface SelectedColor {
-    value: Color | null; // Allow null since initially there might not be a selection
-    label: string;
-    salePrice: string;
-    purchasePrice: string;
-    quantity: string;
-    sku: string;
-    category: Category | null; // Category can also be null initially
+    value: Color | null; // This cannot accept a string
+    label: string; // This accepts a string
+    salePrice: string; // This accepts a string
+    purchasePrice: string; // This accepts a string
+    quantity: string; // This accepts a string
+    sku: string; // This accepts a string
+    category: Category | null; // This cannot accept a string
 }
+
 
 const AddProduct: React.FC<AddProductProps> = ({ open, handleClose }) => {
 
@@ -95,7 +102,7 @@ const AddProduct: React.FC<AddProductProps> = ({ open, handleClose }) => {
     const fetchCategories = async () => {
         try {
             const response = await axios.get('https://backendalaahd.onrender.com/api/categories');
-            const categories = response.data.map(category => ({
+            const categories = response.data.map((category: CategoryResponse) => ({
                 value: category._id,
                 label: category.title,
             }));
@@ -124,19 +131,41 @@ const AddProduct: React.FC<AddProductProps> = ({ open, handleClose }) => {
     };
 
     const handleColorChange = (selectedOption: Color | null, index: number) => {
-    const newSelectedColors = [...selectedColors];
-    newSelectedColors[index].value = selectedOption; // Store the selected option object
-    const colorName = selectedOption ? selectedOption.value : ''; // Get the color name safely
-    newSelectedColors[index].sku = generateSKU(colorName); // Generate SKU
-    setSelectedColors(newSelectedColors);
-};
-
-
-    const handleInputChange = (index: number, field: keyof SelectedColor, value: string) => {
         const newSelectedColors = [...selectedColors];
-        newSelectedColors[index][field] = value;
+        newSelectedColors[index].value = selectedOption; // Store the selected option object
+        const colorName = selectedOption ? selectedOption.value : ''; // Get the color name safely
+        newSelectedColors[index].sku = generateSKU(colorName); // Generate SKU
         setSelectedColors(newSelectedColors);
     };
+
+
+    const handleInputChange = (index: number, field: keyof SelectedColor, value: string | Color | Category | null) => {
+        const newSelectedColors = [...selectedColors];
+
+        // Handle specific field types
+        switch (field) {
+            case 'value':
+                // Ensure that value is of type Color, or set it to null
+                newSelectedColors[index][field] = value as Color; // Assuming value should be of type Color
+                break;
+            case 'category':
+                // Ensure that value is of type Category or null
+                newSelectedColors[index][field] = value as Category | null; // Assuming value should be of type Category
+                break;
+            case 'salePrice':
+            case 'purchasePrice':
+            case 'quantity':
+            case 'sku':
+                // For fields that are strings, we can assign the value directly
+                newSelectedColors[index][field] = value as string; // Treating as string since these are string fields
+                break;
+            default:
+                throw new Error(`Unhandled field type: ${field}`);
+        }
+
+        setSelectedColors(newSelectedColors);
+    };
+
 
     const handleCategoryChange = (selectedOption: Category | null, index: number) => {
         const newSelectedColors = [...selectedColors];
@@ -175,7 +204,7 @@ const AddProduct: React.FC<AddProductProps> = ({ open, handleClose }) => {
                                 <div className="flex justify-between items-center mb-4">
                                     <h3 className="text-lg font-medium">Add Product</h3>
                                     <button onClick={handleClose} className="text-gray-500 hover:text-gray-700">
-                                        <IconX className="w-5 h-5" />
+                                        {/* <IconX className="w-5 h-5" /> */}
                                     </button>
                                 </div>
                                 <form onSubmit={handleAddProduct}>
@@ -287,7 +316,7 @@ const AddProduct: React.FC<AddProductProps> = ({ open, handleClose }) => {
 
                                     <div className="flex justify-end mt-4">
                                         <button type="button" onClick={addColorRow} className="text-blue-600 hover:text-blue-800">
-                                             Add Color
+                                            Add Color
                                         </button>
                                     </div>
 
