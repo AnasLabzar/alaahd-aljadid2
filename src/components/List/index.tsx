@@ -4,7 +4,7 @@ import axios from "axios";
 
 // Define the Package type
 type Package = {
-  name: string;
+  title: string;
   priceId: string;
   colorsId: string[0];
   invoiceDate: string;
@@ -55,7 +55,7 @@ const ListProduct = () => {
         // Fetch price data
         const pricePromises = paginatedProducts.map((product: Package) => {
           if (!product.priceId) {
-            console.warn(`Product ${product._id} is missing priceId.`);
+            // console.warn(`Product ${product._id} is missing priceId.`);
             return Promise.resolve(null); // Return a resolved promise to avoid breaking the map
           }
           return axios.get(`https://backendalaahd.onrender.com/api/prices/${product.priceId}`);
@@ -64,7 +64,7 @@ const ListProduct = () => {
         // Fetch color data
         const colorPromises = paginatedProducts.map((product: Package) => {
           if (!Array.isArray(product.colorsId) || product.colorsId.length === 0) {
-            console.warn(`Product ${product._id} is missing valid colorsId.`);
+            // console.warn(`Product ${product._id} is missing valid colorsId.`);
             return Promise.resolve(null); // Return a resolved promise to avoid breaking the map
           }
           return axios.get(`https://backendalaahd.onrender.com/api/colors/${product.colorsId}`);
