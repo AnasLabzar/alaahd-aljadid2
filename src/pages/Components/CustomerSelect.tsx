@@ -1,46 +1,57 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
-const CustomerSelect = ({ onCustomerChange }) => {
-  const [customers, setCustomers] = useState([]);
-  const [selectedCustomer, setSelectedCustomer] = useState('');
+interface Customer {
+    _id: string; // Assuming _id is the unique identifier
+    username: string; // Assuming username is the property to display
+}
 
-  useEffect(() => {
-    const fetchCustomers = async () => {
-      try {
-        const response = await axios.get('http://localhost:3000/api/users'); // Fetch all users
-        const customRoleUsers = response.data.filter(user => user.role === 'custom'); // Filter by role 'custom'
-        setCustomers(customRoleUsers); // Set the filtered users
-      } catch (error) {
-        console.error('Error fetching customers:', error);
-      }
+interface CustomerSelectProps {
+    onCustomerChange: (customerId: string) => void; // Correct the spelling from onCustomerChangem to onCustomerChange
+    id?: string; // Add an optional id prop
+}
+
+const CustomerSelect: React.FC<CustomerSelectProps> = ({ onCustomerChange, id }) => {
+    const [customers, setCustomers] = useState<Customer[]>([]); // Specify the Customer type
+    const [selectedCustomer, setSelectedCustomer] = useState<string>('');
+
+    useEffect(() => {
+        const fetchCustomers = async () => {
+            try {
+                const response = await axios.get('https://backendalaahd.onrender.com/api/users');
+                const customRoleUsers = response.data.filter((user: any) => user.role === 'custom'); // Type the response if possible
+                setCustomers(customRoleUsers); 
+            } catch (error) {
+                console.error('Error fetching customers:', error);
+            }
+        };
+    
+        fetchCustomers();
+    }, []);
+
+    const handleCustomerChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+        const customerId = event.target.value;
+        setSelectedCustomer(customerId);
+        onCustomerChange(customerId); // Call the passed function with the selected customer ID
     };
-  
-    fetchCustomers();
-  }, []);  
 
-  const handleCustomerChange = (event) => {
-    const customerId = event.target.value;
-    setSelectedCustomer(customerId);
-    onCustomerChange(customerId);
-  };
-
-  return (
-      <select
-        value={selectedCustomer}
-        onChange={handleCustomerChange}
-        className="form-input lg:w-[250px] w-2/3"
-      >
-        <option value="" disabled defaultChecked>
-          Selection client
-        </option>
-        {customers.map((customer) => (
-          <option key={customer._id} value={customer._id}>
-            {customer.username} {/* Display the customer's name */}
-          </option>
-        ))}
-      </select>
-  );
+    return (
+        <select
+            value={selectedCustomer}
+            onChange={handleCustomerChange}
+            className="form-input lg:w-[250px] w-2/3"
+            id={id} // Add the id prop to the select element if needed
+        >
+            <option value="" disabled defaultChecked>
+                Selection client
+            </option>
+            {customers.map((customer) => (
+                <option key={customer._id} value={customer._id}>
+                    {customer.username}
+                </option>
+            ))}
+        </select>
+    );
 };
 
 export default CustomerSelect;

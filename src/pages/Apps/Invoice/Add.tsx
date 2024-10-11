@@ -66,14 +66,14 @@ const Add = () => {
     const [products, setProducts] = useState<ProductType[]>([]);
     const [colors, setColors] = useState<ColorType[]>([]);
     const [invoiceRef, setInvoiceRef] = useState<string>('');
-    const [customerId, setCustomerId] = useState<string>(''); // Assuming you have customerId from context or state
+    const [customerId, setCustomerId] = useState<string>(''); // or whatever type is appropriate
     const [typeFacturation, setTypeFacturation] = useState('customer');
     const [showModal, setShowModal] = useState(false);
 
     useEffect(() => {
         const fetchProducts = async () => {
             try {
-                const response = await axios.get('http://localhost:3000/api/products');
+                const response = await axios.get('https://backendalaahd.onrender.com/api/products');
                 setProducts(response.data);
             } catch (error) {
                 console.error("Error fetching products:", error);
@@ -82,7 +82,7 @@ const Add = () => {
 
         const fetchColors = async () => {
             try {
-                const response = await axios.get('http://localhost:3000/api/colors');
+                const response = await axios.get('https://backendalaahd.onrender.com/api/colors');
                 setColors(response.data);
             } catch (error) {
                 console.error("Error fetching Colors:", error);
@@ -94,7 +94,7 @@ const Add = () => {
         setInvoiceRef(generateInvoiceRef());
     }, []);
 
-    const handleProductChange = (event: SelectChangeEvent<string>, itemId: number) => {
+    const handleProductChange = (event: SelectChangeEvent<any>, itemId: number) => {
         const selectedProductId = event.target.value as string;
         const selectedProduct = products.find(product => product._id === selectedProductId);
 
@@ -104,31 +104,42 @@ const Add = () => {
                 return color ? { _id: color._id, refColor: color.refColor, colorName: color.colorName } : null;
             }).filter(Boolean) as ColorType[];
 
+            // Ensure Refcolor is a string, extract the first color or provide a default
             const refColor = productColors.length > 0 ? productColors[0].refColor : '';
+
             const productPriceId = selectedProduct.priceId;
 
-            fetchProductPrice(productPriceId).then(price => {
-                setItems(prevItems =>
-                    prevItems.map(item =>
-                        item._id === itemId
-                            ? {
-                                ...item,
-                                productId: selectedProductId,
-                                title: selectedProduct.title,
-                                Refcolor: refColor,
-                                colors: productColors,
-                                price: price
-                            }
-                            : item
-                    )
-                );
-            });
+            // Assuming productPriceId is an array of strings
+            if (productPriceId.length > 0) {
+                const firstProductPriceId = productPriceId[0]; // Get the first item, or adjust logic as needed
+
+                fetchProductPrice(firstProductPriceId).then(price => {
+                    setItems(prevItems =>
+                        prevItems.map(item =>
+                            item._id === itemId
+                                ? {
+                                    ...item,
+                                    productId: selectedProductId,
+                                    title: selectedProduct.title,
+                                    Refcolor: refColor, // Only assign the first refColor (as string)
+                                    colors: productColors, // This remains an array
+                                    price: price
+                                }
+                                : item
+                        )
+                    );
+                });
+            } else {
+                console.error("productPriceId is empty");
+            }
+
         }
     };
 
+
     const fetchProductPrice = async (productPriceId: string): Promise<number> => {
         try {
-            const response = await fetch(`http://localhost:3000/api/prices/${productPriceId}`);
+            const response = await fetch(`https://backendalaahd.onrender.com/api/prices/${productPriceId}`);
             if (!response.ok) {
                 throw new Error('Failed to fetch price details');
             }
@@ -250,9 +261,10 @@ const Add = () => {
                             {/* Replace input with the CustomerSelect component */}
                             <CustomerSelect
                                 id="customerSelect"
-                                onChange={(selectedCustomer) => setCustomerId(selectedCustomer)}  // setCustomerId should be a state or a function to handle customer selection
-                                className="lg:w-[250px] w-2/3"
+                                onCustomerChange={(selectedCustomer) => setCustomerId(selectedCustomer)}
+                            // className="lg:w-[250px] w-2/3"
                             />
+
                         </div>
 
                         <div className="flex items-center mt-4">
