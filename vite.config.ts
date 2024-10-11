@@ -12,4 +12,14 @@ export default defineConfig({
             '@': path.resolve(__dirname, './src'),
         },
     },
+    optimizeDeps: {
+        include: ['react-quill'],
+      },
+    build: {
+        rollupOptions: {
+          external: ['react-quill/dist/quill.snow.css'],
+        },
+      },
 });
+
+  
