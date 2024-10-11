@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   // other metadata
 };
 
-const ProductPage = () => {
+const InvoicePage = () => {
   return (
     <DefaultLayout>
       <div className="mx-auto max-w-7xl">
@@ -22,4 +22,4 @@ const ProductPage = () => {
   );
 };
 
-export default ProductPage;
+export default InvoicePage;
