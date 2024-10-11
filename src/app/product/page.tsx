@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 import DefaultLayout from "@/components/Layouts/DefaultLaout";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
-import CalendarBox from "@/components/CalenderBox";
+import AddInvoice from "@/components/AddInvoice";
 
 export const metadata: Metadata = {
   title: "Next.js Calender Page | NextAdmin - Next.js Dashboard Kit",
@@ -10,16 +10,16 @@ export const metadata: Metadata = {
   // other metadata
 };
 
-const CalendarPage = () => {
+const ProductPage = () => {
   return (
     <DefaultLayout>
       <div className="mx-auto max-w-7xl">
-        <Breadcrumb pageName="Calendar" />
+        <Breadcrumb pageName="produit" />
 
-        <CalendarBox />
+        <AddInvoice />
       </div>
     </DefaultLayout>
   );
 };
 
-export default CalendarPage;
+export default ProductPage;
