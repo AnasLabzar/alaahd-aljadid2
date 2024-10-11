@@ -59,7 +59,7 @@ const SelectGroupTwo: React.FC = () => {
           </option>
         </select>
 
-        <span className="absolute right-4.5 top-1/2 z-10 -translate-y-1/2 text-dark-4 dark:text-dark-6">
+        <span className="absolute right-4.5 top-1/2 z-10 -translate-y-1/2 text-dark-2 dark:text-dark-6">
           <svg
             className="fill-current"
             width="20"

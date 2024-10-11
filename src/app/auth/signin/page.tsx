@@ -36,13 +36,13 @@ const SignIn: React.FC = () => {
                 />
                 <Image
                   className="dark:hidden"
-                  src={"/images/logo/logo-dark.svg"}
+                  src={"/images/logo/logo-dark.png"}
                   alt="Logo"
                   width={176}
                   height={32}
                 />
               </Link>
-              <p className="mb-3 text-xl font-medium text-dark dark:text-white">
+              <p className="mb-3 text-md font-medium text-dark dark:text-white">
                 Sign in to your account
               </p>
 
@@ -50,7 +50,7 @@ const SignIn: React.FC = () => {
                 Welcome Back!
               </h1>
 
-              <p className="w-full max-w-[375px] font-medium text-dark-4 dark:text-dark-6">
+              <p className="w-full max-w-[375px] font-medium text-dark-2 dark:text-dark-6">
                 Please sign in to your account by completing the necessary
                 fields below
               </p>

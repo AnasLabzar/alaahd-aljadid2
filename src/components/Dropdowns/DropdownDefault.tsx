@@ -37,7 +37,7 @@ const DropdownDefault = () => {
           <div
             className={`absolute right-0 top-full z-40 w-46.5 space-y-1.5 rounded-[7px] border border-stroke bg-white p-2 shadow-2 dark:border-dark-3 dark:bg-dark-2 dark:shadow-card`}
           >
-            <button className="flex w-full items-center gap-2 rounded-lg px-2.5 py-[9px] text-left  font-medium text-dark-4 hover:bg-gray-2 hover:text-dark dark:text-dark-6 dark:hover:bg-dark-3 dark:hover:text-white">
+            <button className="flex w-full items-center gap-2 rounded-lg px-2.5 py-[9px] text-left  font-medium text-dark-2 hover:bg-gray-2 hover:text-dark dark:text-dark-6 dark:hover:bg-dark-3 dark:hover:text-white">
               <svg
                 className="fill-current"
                 width="18"
@@ -62,7 +62,7 @@ const DropdownDefault = () => {
               </svg>
               Edit
             </button>
-            <button className="flex w-full items-center gap-2 rounded-lg px-2.5 py-[9px] text-left font-medium text-dark-4 hover:bg-gray-2 hover:text-dark dark:text-dark-6 dark:hover:bg-dark-3 dark:hover:text-white">
+            <button className="flex w-full items-center gap-2 rounded-lg px-2.5 py-[9px] text-left font-medium text-dark-2 hover:bg-gray-2 hover:text-dark dark:text-dark-6 dark:hover:bg-dark-3 dark:hover:text-white">
               <svg
                 className="fill-current"
                 width="18"

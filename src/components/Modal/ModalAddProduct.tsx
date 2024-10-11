@@ -12,10 +12,14 @@ interface AddProductProps {
     handleClose: () => void;
 }
 
+// Define the ColorType interface
 interface ColorType {
     _id: string;
-    refColor: string; // The hex code for the color
-    colorName: string;
+    refColor: string;
+    name: string;  // This is the property we're using in the filtering
+    stock_color: string;
+    fetchedAt: string;
+    __v: number;
 }
 
 // Define Color interface
@@ -62,17 +66,17 @@ const AddProduct: React.FC<AddProductProps> = ({ open, handleClose }) => {
     const fetchUniqueColors = async () => {
         try {
             const response = await axios.get('https://backendalaahd.onrender.com/api/colors');
-            const colors = response.data;
-
+            const colors: ColorType[] = response.data;
+    
             const uniqueColorsMap = new Map<string, string>();
-
-            // Specify the type of color in the forEach parameter
-            colors.forEach((color: ColorType) => {
-                if (color.colorName !== 'NONE' && !uniqueColorsMap.has(color.colorName)) {
-                    uniqueColorsMap.set(color.colorName, color.refColor);
+    
+            // Loop through the colors and filter duplicates by name, excluding 'NONE'
+            colors.forEach((color) => {
+                if (color.name !== 'NONE' && !uniqueColorsMap.has(color.name)) {
+                    uniqueColorsMap.set(color.name, color.refColor);
                 }
             });
-
+    
             const formattedColors = Array.from(uniqueColorsMap.entries()).map(([name, refColor]) => ({
                 value: name,
                 label: (
@@ -91,12 +95,14 @@ const AddProduct: React.FC<AddProductProps> = ({ open, handleClose }) => {
                 ),
                 refColor
             }));
-
+    
             setColorOptions(formattedColors);
         } catch (error) {
             console.error('Error fetching colors:', error);
         }
     };
+
+
 
     // Fetch categories
     const fetchCategories = async () => {
@@ -305,7 +311,7 @@ const AddProduct: React.FC<AddProductProps> = ({ open, handleClose }) => {
                                                         </td>
                                                         <td className="border border-gray-300 p-2 text-center">
                                                             <button type="button" onClick={() => handleDeleteColorRow(index)} className="text-red-600 hover:text-red-800">
-                                                                Supprimer
+                                                                <svg id="Layer_1" enable-background="new 0 0 25.9 32" viewBox="0 0 25.9 32" xmlns="http://www.w3.org/2000/svg"><path d="m8 10h2v16h-2z" /><path d="m12 10h2v16h-2z" /><path d="m16 10h2v16h-2z" /><path d="m18 4v-4h-10v4h-8v2h2l1 23c0 1.7 1.3 3 3 3h14c1.6 0 3-1.3 3-3l1-23h1.9v-2zm-8-2h6v2h-6zm11 27c0 .6-.4 1-1 1h-14c-.6 0-1-.5-1-1l-1-23h18z" /></svg>
                                                             </button>
                                                         </td>
                                                     </tr>

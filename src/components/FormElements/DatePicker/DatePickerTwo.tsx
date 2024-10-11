@@ -28,7 +28,7 @@ const DatePickerTwo = () => {
           data-class="flatpickr-right"
         />
 
-        <div className="pointer-events-none absolute inset-0 left-auto right-5 flex items-center text-dark-4 dark:text-dark-6">
+        <div className="pointer-events-none absolute inset-0 left-auto right-5 flex items-center text-dark-2 dark:text-dark-6">
           <svg
             className="fill-current"
             width="20"

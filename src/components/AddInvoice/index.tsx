@@ -2,9 +2,10 @@
 
 // pages/add-invoice.tsx
 import { useEffect, useState } from 'react';
-import { useDispatch } from 'react-redux';
 import axios from 'axios';
 import { SelectChangeEvent } from '@mui/material';
+import { ChangeEvent } from 'react';
+
 import CustomerSelect from '../CustomerSelect';
 import Link from 'next/link'; // Import Link from next/link
 import { FormControl, TextField, InputLabel, Select, MenuItem } from '@mui/material'; // Import FormControl and other components here
@@ -176,7 +177,8 @@ const AddInvoice = () => {
         );
     };
 
-    const handleAddProduct = () => {
+    // Open modal
+    const handleOpenModal = () => {
         setShowModal(true);
     };
 
@@ -209,25 +211,25 @@ const AddInvoice = () => {
 
     return (
         <div className="flex xl:flex-row flex-col gap-2.5">
-            <div className="panel px-0 flex-1 py-6 ltr:xl:mr-6 rtl:xl:ml-6">
+            <div className="bg-white p-5 shadow dark:bg-black px-0 flex-1 py-6 ltr:xl:mr-6 rtl:xl:ml-6">
                 <div className="flex justify-between flex-wrap px-4">
                     <div className="mb-6 lg:w-1/2 w-full">
                         <div className="flex items-center text-black dark:text-white shrink-0">
-                            <img src="/assets/images/logo.svg" alt="img" className="w-14" />
+                            <img src="/images/logo/logo.png" alt="img" className="w-20" />
                         </div>
                         <div className="space-y-1 mt-6 text-gray-500 dark:text-gray-400">
-                            <div>13 Tetrick Road, Cypress Gardens, Florida, 33884, US</div>
-                            <div>vristo@gmail.com</div>
-                            <div>+1 (070) 123-4567</div>
+                            <div>El Gouassem, Route de l'ourika, Marrakech-safi</div>
+                            <div>alaahd-aljadid@gmail.com</div>
+                            <div>+212 689-063963</div>
                         </div>
                         <div className="space-y-1 mt-4 text-black font-bold">
                             <div>Agent de facturation:</div>
-                            <div className='font-normal'>M. <span>Admin here</span></div>
+                            <div className='font-normal'>M. <span>Mehdi El kouadni</span></div>
                         </div>
                     </div>
                     <div className="lg:w-1/2 w-full lg:max-w-fit">
-                        <div className="flex items-center mt-4">
-                            <label htmlFor="invoiceRef" className="flex-1 ltr:mr-2 rtl:ml-2 mb-0">
+                        <div className="flex flex-col items-center sm:flex-row mt-4">
+                            <label htmlFor="invoiceRef" className="text-left flex-1 ltr:mr-2 rtl:ml-2 mb-0">
                                 Facture numéro
                             </label>
                             <input
@@ -239,8 +241,8 @@ const AddInvoice = () => {
                                 readOnly
                             />
                         </div>
-                        <div className="flex items-center mt-4">
-                            <label htmlFor="customerSelect" className="flex-1 ltr:mr-2 rtl:ml-2 mb-0">
+                        <div className="flex flex-col items-center sm:flex-row mt-4">
+                            <label htmlFor="customerSelect" className="text-left flex-1 ltr:mr-2 rtl:ml-2 mb-0">
                                 Nom de client
                             </label>
                             {/* Replace input with the CustomerSelect component */}
@@ -252,14 +254,14 @@ const AddInvoice = () => {
 
                         </div>
 
-                        <div className="flex items-center mt-4">
-                            <label htmlFor="startDate" className="flex-1 ltr:mr-2 rtl:ml-2 mb-0">
+                        <div className="flex flex-col items-center sm:flex-row mt-4">
+                            <label htmlFor="startDate" className="text-left flex-1 ltr:mr-2 rtl:ml-2 mb-0">
                                 Date de creation
                             </label>
                             <input id="startDate" type="date" name="inv-date" className="form-input lg:w-[250px] w-2/3" />
                         </div>
-                        <div className="flex items-center mt-4">
-                            <label htmlFor="dueDate" className="flex-1 ltr:mr-2 rtl:ml-2 mb-0">
+                        <div className="flex flex-col items-center sm:flex-row mt-4">
+                            <label htmlFor="dueDate" className="text-left flex-1 ltr:mr-2 rtl:ml-2 mb-0">
                                 Date de fin
                             </label>
                             <input id="dueDate" type="date" name="due-date" className="form-input lg:w-[250px] w-2/3" />
@@ -267,37 +269,37 @@ const AddInvoice = () => {
                     </div>
                 </div>
                 <hr className="border-white-light dark:border-[#1b2e4b] my-6" />
-                <div className="mt-8">
-                    <div className="table-responsive">
+                <div className="mt-8 px-[14px]">
+                    <div className="table-responsive overflow-auto">
                         <table className="w-full border-collapse">
                             <thead>
                                 <tr className="bg-gray-200">
                                     <th className="p-2 text-left">ID</th>
                                     <th className="p-2 text-left">Order</th>
-                                    <th className="w-1 p-2 text-left">Prix</th>
-                                    <th className="w-1 p-2 text-left">Quantité</th>
+                                    <th className="p-2 text-left">Prix</th>
+                                    <th className="p-2 text-left">Quantité</th>
                                     <th className="p-2 text-left">Totale</th>
-                                    <th className="w-1 p-2"></th>
+                                    <th className="p-2"></th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {items.map((item, index) => (
                                     <tr key={item._id}>
-                                        <td>{index + 1}</td>
-                                        <td>
+                                        <td className="p-2">{index + 1}</td>
+                                        <td className="p-2">
                                             <FormControl fullWidth style={{ display: 'flex', flexDirection: 'row', gap: '10px' }}>
                                                 <TextField
                                                     variant="outlined"
                                                     placeholder="Rechercher produit"
                                                     value={item.searchTerm}
                                                     onChange={handleSearchChange(item._id)}
-                                                    style={{ marginBottom: '8px' }}
+                                                    style={{ display: 'flex', alignSelf: 'center' }}
                                                 />
 
                                                 <Select
                                                     value={item.productId}
                                                     onChange={(event) => handleProductChange(event, item._id)}
-                                                    style={{ marginBottom: '8px' }}
+                                                    style={{ display: 'flex', alignSelf: 'center' }}
                                                 >
                                                     {products
                                                         .filter(product => product.title.toLowerCase().includes(item.searchTerm.toLowerCase())) // Filter by item-specific search term
@@ -326,33 +328,31 @@ const AddInvoice = () => {
                                                             );
                                                         })}
                                                 </Select>
-
-                                                {typeFacturation === 'fournisseur' && (
-                                                    <AddProduct open={showModal} handleClose={handleCloseModal} />
-                                                )}
                                             </FormControl>
                                         </td>
 
 
-                                        <td>
+                                        <td className="p-2">
                                             <TextField
                                                 type="number"
                                                 value={item.price}
                                                 onChange={(e) => changeQuantityPrice('price', Number(e.target.value), item._id)}
-                                                className="w-24"
+                                                className="w-auto"
                                             />
                                         </td>
-                                        <td>
+                                        <td className="p-2">
                                             <TextField
                                                 type="number"
                                                 value={item.quantity}
                                                 onChange={(e) => changeQuantityPrice('quantity', Number(e.target.value), item._id)}
-                                                className="w-24"
+                                                className="w-auto"
                                             />
                                         </td>
-                                        <td>{(item.price * item.quantity).toFixed(2)} $</td>
-                                        <td>
-                                            <button onClick={() => removeItem(item._id)} className="text-red-600">Supprimer</button>
+                                        <td className="p-2">{(item.price * item.quantity).toFixed(2)} $</td>
+                                        <td className="p-2">
+                                            <button onClick={() => removeItem(item._id)} className="fill-red-600">
+                                                <svg width="12" id="Layer_1" enable-background="new 0 0 25.9 32" viewBox="0 0 25.9 32" xmlns="http://www.w3.org/2000/svg"><path d="m8 10h2v16h-2z" /><path d="m12 10h2v16h-2z" /><path d="m16 10h2v16h-2z" /><path d="m18 4v-4h-10v4h-8v2h2l1 23c0 1.7 1.3 3 3 3h14c1.6 0 3-1.3 3-3l1-23h1.9v-2zm-8-2h6v2h-6zm11 27c0 .6-.4 1-1 1h-14c-.6 0-1-.5-1-1l-1-23h18z" /></svg>
+                                            </button>
                                         </td>
                                     </tr>
                                 ))}
@@ -369,7 +369,7 @@ const AddInvoice = () => {
                         <div className="sm:w-2/5">
                             <div className="flex items-center justify-between">
                                 <div>Subtotal</div>
-                                <div>${calculateTotal()}</div>
+                                <div>DH{calculateTotal()}</div>
                             </div>
                             <div className="flex items-center justify-between mt-4">
                                 <div>Tax(%)</div>
@@ -377,7 +377,7 @@ const AddInvoice = () => {
                             </div>
                             <div className="flex items-center justify-between mt-4">
                                 <div>Transport(DH)</div>
-                                <div>$0.00</div>
+                                <div>DH0.00</div>
                             </div>
                             <div className="flex items-center justify-between mt-4">
                                 <div>Promotion(%)</div>
@@ -385,7 +385,7 @@ const AddInvoice = () => {
                             </div>
                             <div className="flex items-center justify-between mt-4 font-semibold">
                                 <div>Totale</div>
-                                <div>$0.00</div>
+                                <div>DH0.00</div>
                             </div>
                         </div>
                     </div>
@@ -395,10 +395,9 @@ const AddInvoice = () => {
                     <textarea id="notes" name="notes" className="form-textarea min-h-[130px]" placeholder="Noté ici...."></textarea>
                 </div>
             </div>
-            <div className="xl:w-96 w-full xl:mt-0 mt-6">
-                <div className="panel mb-5">
+            <div className="xl:w-80 w-full xl:mt-0 mt-6">
+                <div className="bg-white p-5 shadow dark:bg-black px-4 flex-1 py-6 mb-5">
                     <FormControl fullWidth>
-                        <InputLabel id="type-label">Type Facturation</InputLabel>
                         <Select
                             labelId="type-label"
                             id="type"
@@ -407,6 +406,8 @@ const AddInvoice = () => {
                             onChange={handleTypeChange}
                             className="form-select"
                         >
+                            <MenuItem value="" disabled defaultChecked>Type Facturation</MenuItem>
+
                             <MenuItem value="customer">Client</MenuItem>
                             <MenuItem value="fournisseur">Fournisseur</MenuItem>
                         </Select>
@@ -435,6 +436,15 @@ const AddInvoice = () => {
                 </div>
                 <div className="panel">
                     <div className="grid xl:grid-cols-1 lg:grid-cols-4 sm:grid-cols-2 grid-cols-1 gap-4">
+                        {/* Conditionally render the button for "fournisseur" */}
+                        {/* Conditionally render the button for "fournisseur" */}
+                        {typeFacturation === 'fournisseur' && (
+                            <button color="primary" onClick={handleOpenModal}>
+                                + Add Product
+                            </button>
+                        )}
+
+
                         <button type="button" className="btn btn-success w-full gap-2">
                             {/* <IconSave className="ltr:mr-2 rtl:ml-2 shrink-0" /> */}
                             Enregistre
@@ -452,6 +462,8 @@ const AddInvoice = () => {
                     </div>
                 </div>
             </div>
+            {/* Modal for adding product */}
+            <AddProduct open={showModal} handleClose={handleCloseModal} />
         </div>
     );
 };
