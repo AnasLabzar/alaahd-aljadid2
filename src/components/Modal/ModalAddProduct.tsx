@@ -1,6 +1,5 @@
 import { useState, Fragment, useEffect } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
-import { useDispatch } from 'react-redux';
 import Select from 'react-select';
 import axios from 'axios';
 import MaskedInput from 'react-text-mask';
@@ -38,11 +37,6 @@ interface SelectedColor {
 }
 
 const AddProduct: React.FC<AddProductProps> = ({ open, handleClose }) => {
-    const dispatch = useDispatch();
-
-    useEffect(() => {
-        dispatch(setPageTitle('Add Product'));
-    }, [dispatch]);
 
     const [productName, setProductName] = useState<string>('');
     const [colorOptions, setColorOptions] = useState<Color[]>([]);
