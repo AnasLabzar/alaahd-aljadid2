@@ -16,8 +16,10 @@ interface ProductType {
     _id: string;
     title: string;
     colorsId: string[];
-    priceId: string[];
+    priceId: string; // Changed from string[] to string
 }
+
+
 
 interface ColorType {
     _id: string;
@@ -61,6 +63,10 @@ const AddInvoice = () => {
     const [customerId, setCustomerId] = useState<string>(''); // or whatever type is appropriate
     const [typeFacturation, setTypeFacturation] = useState('customer');
     const [showModal, setShowModal] = useState(false);
+    const [tax, setTax] = useState<number>(0); // State for tax percentage
+    const [promotion, setPromotion] = useState<number>(0); // State for promotion percentage
+    const [transportPrice, setTransportPrice] = useState<number>(0); // State for transport price
+
 
     useEffect(() => {
         const fetchProducts = async () => {
@@ -100,7 +106,11 @@ const AddInvoice = () => {
             const productPriceId = selectedProduct.priceId;
 
             if (productPriceId.length > 0) {
-                const firstProductPriceId = productPriceId[0];
+                const firstProductPriceId = productPriceId;
+
+                // Add console log to check the priceId
+                console.log("Selected Price ID: ", firstProductPriceId);
+
                 fetchProductPrice(firstProductPriceId).then(price => {
                     setItems(prevItems =>
                         prevItems.map(item =>
@@ -111,7 +121,7 @@ const AddInvoice = () => {
                                     title: selectedProduct.title,
                                     Refcolor: refColor,
                                     colors: productColors,
-                                    price: price,
+                                    price: price, // Set the fetched price here
                                 }
                                 : item
                         )
@@ -129,13 +139,26 @@ const AddInvoice = () => {
             if (!response.ok) {
                 throw new Error('Failed to fetch price details');
             }
+
             const productData = await response.json();
-            return productData.price;
+            console.log("Full Product Data: ", productData); // Log the entire response
+
+            // Check if 'price' exists in the response and log it
+            if (productData.price !== undefined) {
+                console.log("Fetched Price: ", productData.price);
+                return productData.price;
+            } else {
+                console.error("Price not found in the response");
+                return 0; // Return a default value if price is missing
+            }
+
         } catch (error) {
             console.error('Error fetching product price:', error);
             return 0; // Return a default value in case of error
         }
     };
+
+
 
     const generateInvoiceRef = (): string => {
         const date = new Date();
@@ -204,10 +227,44 @@ const AddInvoice = () => {
         );
     };
 
+    // Capture Tax and Promotion Changes
+    const handleTaxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = parseFloat(e.target.value);
+        setTax(isNaN(value) ? 0 : value); // Ensure tax is a number
+    };
+
+    const handlePromotionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = parseFloat(e.target.value);
+        setPromotion(isNaN(value) ? 0 : value); // Ensure promotion is a number
+    };
+
+    const handleTransportChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = parseFloat(e.target.value);
+        setTransportPrice(isNaN(value) ? 0 : value); // Ensure transport is a number
+    };
+
+    // Calculate subtotal, tax, promotion, transport dynamically
     const calculateTotal = () => {
         const subtotal = items.reduce((total, item) => total + item.quantity * item.price, 0);
-        return subtotal.toFixed(2);
+
+        // Apply tax and promotion
+        const taxAmount = (tax / 100) * subtotal;
+        const promotionAmount = (promotion / 100) * subtotal;
+
+        // Final total with tax, promotion, and transport
+        const total = (subtotal + taxAmount - promotionAmount) + transportPrice;
+
+        return {
+            subtotal: subtotal.toFixed(2),
+            taxAmount: taxAmount.toFixed(2),
+            promotionAmount: promotionAmount.toFixed(2),
+            total: total.toFixed(2),
+            transportPrice: transportPrice.toFixed(2),
+        };
     };
+
+    const totals = calculateTotal(); // Get all totals (subtotal, tax, promotion, final total)
+
 
     return (
         <div className="flex xl:flex-row flex-col gap-2.5">
@@ -348,7 +405,7 @@ const AddInvoice = () => {
                                                 className="w-auto"
                                             />
                                         </td>
-                                        <td className="p-2">{(item.price * item.quantity).toFixed(2)} $</td>
+                                        <td className="p-2">{(item.price * item.quantity).toFixed(2)}</td>
                                         <td className="p-2">
                                             <button onClick={() => removeItem(item._id)} className="fill-red-600">
                                                 <svg width="12" id="Layer_1" enable-background="new 0 0 25.9 32" viewBox="0 0 25.9 32" xmlns="http://www.w3.org/2000/svg"><path d="m8 10h2v16h-2z" /><path d="m12 10h2v16h-2z" /><path d="m16 10h2v16h-2z" /><path d="m18 4v-4h-10v4h-8v2h2l1 23c0 1.7 1.3 3 3 3h14c1.6 0 3-1.3 3-3l1-23h1.9v-2zm-8-2h6v2h-6zm11 27c0 .6-.4 1-1 1h-14c-.6 0-1-.5-1-1l-1-23h18z" /></svg>
@@ -369,23 +426,23 @@ const AddInvoice = () => {
                         <div className="sm:w-2/5">
                             <div className="flex items-center justify-between">
                                 <div>Subtotal</div>
-                                <div>DH{calculateTotal()}</div>
+                                <div>DH{totals.subtotal}</div>
                             </div>
                             <div className="flex items-center justify-between mt-4">
                                 <div>Tax(%)</div>
-                                <div>0%</div>
+                                <div>DH{totals.taxAmount}</div> {/* Display tax amount */}
                             </div>
                             <div className="flex items-center justify-between mt-4">
                                 <div>Transport(DH)</div>
-                                <div>DH0.00</div>
+                                <div>DH{totals.transportPrice}</div> {/* Assuming static transport for now */}
                             </div>
                             <div className="flex items-center justify-between mt-4">
                                 <div>Promotion(%)</div>
-                                <div>0%</div>
+                                <div>DH{totals.promotionAmount}</div> {/* Display promotion amount */}
                             </div>
                             <div className="flex items-center justify-between mt-4 font-semibold">
-                                <div>Totale</div>
-                                <div>DH0.00</div>
+                                <div>Total</div>
+                                <div>DH{totals.total}</div> {/* Display final total */}
                             </div>
                         </div>
                     </div>
@@ -415,13 +472,41 @@ const AddInvoice = () => {
                     <div className="mt-4">
                         <div className="grid sm:grid-cols-2 grid-cols-1 gap-4">
                             <div>
-                                <label htmlFor="tax">Tax(%) </label>
-                                <input id="tax" type="number" name="tax" className="form-input" defaultValue={0} placeholder="Tax" />
+                                <label htmlFor="tax">Tax(%)</label>
+                                <input
+                                    id="tax"
+                                    type="number"
+                                    name="tax"
+                                    className="form-input"
+                                    value={tax}
+                                    onChange={handleTaxChange} // Update tax on input change
+                                    placeholder="Tax"
+                                />
                             </div>
                             <div>
-                                <label htmlFor="discount">Promotion(%) </label>
-                                <input id="discount" type="number" name="discount" className="form-input" defaultValue={0} placeholder="Promotion" />
+                                <label htmlFor="discount">Promotion(%)</label>
+                                <input
+                                    id="discount"
+                                    type="number"
+                                    name="discount"
+                                    className="form-input"
+                                    value={promotion}
+                                    onChange={handlePromotionChange} // Update promotion on input change
+                                    placeholder="Promotion"
+                                />
                             </div>
+                        </div>
+                        <div>
+                            <label htmlFor="transport">Transport Price(DH)</label>
+                            <input
+                                id="transport"
+                                type="number"
+                                name="transport"
+                                className="form-input"
+                                value={transportPrice}
+                                onChange={handleTransportChange} // Update transport on input change
+                                placeholder="Transport Price"
+                            />
                         </div>
                     </div>
                     <div className="mt-4">

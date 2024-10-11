@@ -14,7 +14,7 @@ const ProductPage = () => {
   return (
     <DefaultLayout>
       <div className="mx-auto max-w-7xl">
-        <Breadcrumb pageName="produit" />
+        <Breadcrumb pageName="Crée nouveau facture" />
 
         <AddInvoice />
       </div>
