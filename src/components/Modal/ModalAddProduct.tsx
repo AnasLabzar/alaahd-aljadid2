@@ -12,6 +12,12 @@ interface AddProductProps {
     handleClose: () => void;
 }
 
+interface ColorType {
+    _id: string;
+    refColor: string; // The hex code for the color
+    colorName: string;
+}
+
 // Define Color interface
 interface Color {
     value: string;
@@ -50,11 +56,13 @@ const AddProduct: React.FC<AddProductProps> = ({ open, handleClose }) => {
         try {
             const response = await axios.get('https://backendalaahd.onrender.com/api/colors');
             const colors = response.data;
+
             const uniqueColorsMap = new Map<string, string>();
 
-            colors.forEach(color => {
-                if (color.name !== 'NONE' && !uniqueColorsMap.has(color.name)) {
-                    uniqueColorsMap.set(color.name, color.refColor);
+            // Specify the type of color in the forEach parameter
+            colors.forEach((color: ColorType) => {
+                if (color.colorName !== 'NONE' && !uniqueColorsMap.has(color.colorName)) {
+                    uniqueColorsMap.set(color.colorName, color.refColor);
                 }
             });
 
