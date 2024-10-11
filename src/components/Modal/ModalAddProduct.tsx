@@ -124,12 +124,13 @@ const AddProduct: React.FC<AddProductProps> = ({ open, handleClose }) => {
     };
 
     const handleColorChange = (selectedOption: Color | null, index: number) => {
-        const newSelectedColors = [...selectedColors];
-        newSelectedColors[index].value = selectedOption; // Store the selected option object
-        const colorName = selectedOption?.value || ''; // Get the color name
-        newSelectedColors[index].sku = generateSKU(colorName); // Generate SKU
-        setSelectedColors(newSelectedColors);
-    };    
+    const newSelectedColors = [...selectedColors];
+    newSelectedColors[index].value = selectedOption; // Store the selected option object
+    const colorName = selectedOption ? selectedOption.value : ''; // Get the color name safely
+    newSelectedColors[index].sku = generateSKU(colorName); // Generate SKU
+    setSelectedColors(newSelectedColors);
+};
+
 
     const handleInputChange = (index: number, field: keyof SelectedColor, value: string) => {
         const newSelectedColors = [...selectedColors];
