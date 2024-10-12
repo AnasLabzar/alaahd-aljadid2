@@ -268,7 +268,7 @@ const AddInvoice = () => {
 
     return (
         <div className="flex xl:flex-row flex-col gap-2.5">
-            <div className="bg-white p-5 shadow dark:bg-black px-0 flex-1 py-6 ltr:xl:mr-6 rtl:xl:ml-6">
+            <div className="bg-white p-5 shadow dark:bg-black px-4 flex-1 py-6 ltr:xl:mr-6 rtl:xl:ml-6">
                 <div className="flex justify-between flex-wrap px-4">
                     <div className="mb-6 lg:w-1/2 w-full">
                         <div className="flex items-center text-black dark:text-white shrink-0">
@@ -285,7 +285,7 @@ const AddInvoice = () => {
                         </div>
                     </div>
                     <div className="lg:w-1/2 w-full lg:max-w-fit">
-                        <div className="flex flex-col items-center sm:flex-row mt-4">
+                        <div className="flex gap-2 flex-col items-center sm:flex-row mt-4">
                             <label htmlFor="invoiceRef" className="text-left flex-1 ltr:mr-2 rtl:ml-2 mb-0">
                                 Facture numéro
                             </label>
@@ -298,7 +298,7 @@ const AddInvoice = () => {
                                 readOnly
                             />
                         </div>
-                        <div className="flex flex-col items-center sm:flex-row mt-4">
+                        <div className="flex gap-2 flex-col items-center sm:flex-row mt-4">
                             <label htmlFor="customerSelect" className="text-left flex-1 ltr:mr-2 rtl:ml-2 mb-0">
                                 Nom de client
                             </label>
@@ -311,13 +311,13 @@ const AddInvoice = () => {
 
                         </div>
 
-                        <div className="flex flex-col items-center sm:flex-row mt-4">
+                        <div className="flex gap-2 flex-col items-center sm:flex-row mt-4">
                             <label htmlFor="startDate" className="text-left flex-1 ltr:mr-2 rtl:ml-2 mb-0">
                                 Date de creation
                             </label>
                             <input id="startDate" type="date" name="inv-date" className="form-input lg:w-[250px] w-2/3" />
                         </div>
-                        <div className="flex flex-col items-center sm:flex-row mt-4">
+                        <div className="flex gap-2 flex-col items-center sm:flex-row mt-4">
                             <label htmlFor="dueDate" className="text-left flex-1 ltr:mr-2 rtl:ml-2 mb-0">
                                 Date de fin
                             </label>
