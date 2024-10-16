@@ -6,6 +6,7 @@ import { useRouter } from 'next/router';
 import Link from 'next/link';
 
 interface Invoice {
+    // Define your Invoice interface properties here
     invoiceNumber: string;
     createdAt: string;
     orderId: string;
@@ -34,9 +35,8 @@ interface Item {
     price: number;
 }
 
-const DetailInvoice = () => {
-    const router = useRouter();
-    const { id } = router.query; // Get invoiceId from URL
+// Add id prop to the component
+const DetailInvoice: React.FC<{ id: string }> = ({ id }) => {
     const [invoice, setInvoice] = useState<Invoice | null>(null);
     const [items, setItems] = useState<Item[]>([]);
     const [user, setUser] = useState<User>({ role: '', username: '' });
@@ -50,7 +50,7 @@ const DetailInvoice = () => {
                 setLoading(true);
                 const invoiceResponse = await axios.get(`https://backendalaahd.onrender.com/api/invoices/${id}`);
                 setInvoice(invoiceResponse.data);
-                
+
                 const orderPromises = invoiceResponse.data.orderIds.map((orderId: string) =>
                     axios.get(`https://backendalaahd.onrender.com/api/orders/${orderId}`)
                 );
@@ -61,10 +61,8 @@ const DetailInvoice = () => {
 
                 const userResponse = await axios.get(`https://backendalaahd.onrender.com/api/users/${invoiceResponse.data.customerId}`);
                 setUser(userResponse.data);
-
             } catch (error) {
                 console.error("Error fetching invoice data:", error);
-                // Optional: Handle 404 or other error states
             } finally {
                 setLoading(false);
             }

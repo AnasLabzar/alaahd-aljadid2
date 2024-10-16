@@ -3,6 +3,11 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import DetailInvoice from "../Showinvoice";
 import Link from "next/link";
+import DatePicker from "react-datepicker"; // Import DatePicker
+import "react-datepicker/dist/react-datepicker.css"; // Import DatePicker styles
+import { FaCalendarAlt } from "react-icons/fa"; // Import the calendar icon from react-icons
+import InvoiceDetailModal from "../Modal/ModalInvoice";
+
 
 
 type Invoice = {
@@ -18,6 +23,8 @@ type Invoice = {
 type Order = {
     _id: string;
     status: string;
+    ordred: string;
+    dueDate: string;
 };
 
 type User = {
@@ -33,7 +40,22 @@ const ListInvoice = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const rowsPerPage = 20;
     const [searchTerm, setSearchTerm] = useState('');
-    const [loading, setLoading] = useState(true); // Loading state
+    const [loading, setLoading] = useState(true);
+    const [selectedStatus, setSelectedStatus] = useState('all');
+    const [startDate, setStartDate] = useState<Date | null>(null); // Start date for filtering
+    const [endDate, setEndDate] = useState<Date | null>(null); // End date for filtering
+    const [showModal, setShowModal] = useState(false);
+
+
+
+    // Open modal
+    const handleOpenModal = () => {
+        setShowModal(true);
+    };
+
+    const handleCloseModal = () => {
+        setShowModal(false);
+    };
 
     useEffect(() => {
         const fetchInvoices = async () => {
@@ -81,20 +103,40 @@ const ListInvoice = () => {
         fetchInvoices();
     }, []);
 
-    // Sort invoices by fetchedAt date (descending)
-    const sortedInvoices = [...allInvoices].sort((a, b) => new Date(b.fetchedAt).getTime() - new Date(a.fetchedAt).getTime());
-
-    // Filter invoices based on search term (invoiceRef or customer username)
-    const filteredInvoices = sortedInvoices.filter((invoice) => {
+    // Filter invoices by ordred date, status, and search term
+    const filteredInvoices = allInvoices.filter((invoice) => {
         const customerUsername = users[invoice.customerId]?.username?.toLowerCase() || '';
         const invoiceRef = invoice.invoiceRef.toLowerCase();
-        return customerUsername.includes(searchTerm.toLowerCase()) || invoiceRef.includes(searchTerm.toLowerCase());
+        const firstOrderId = invoice.orderId[0];
+        const orderStatus = firstOrderId ? orders[firstOrderId]?.status : "N/A";
+        const ordredDate = firstOrderId ? new Date(orders[firstOrderId]?.ordred || "") : null;
+
+        const statusMatch = selectedStatus === 'all' || orderStatus === selectedStatus;
+        const searchMatch = customerUsername.includes(searchTerm.toLowerCase()) || invoiceRef.includes(searchTerm.toLowerCase());
+        const dateMatch = ordredDate
+            ? (!startDate || ordredDate >= startDate) && (!endDate || ordredDate <= endDate)
+            : false;
+
+        return searchMatch && statusMatch && dateMatch;
     });
 
-    // Calculate pagination
-    const totalRows = filteredInvoices.length;
+    // Sort the filtered invoices by the ordred date, most recent first
+    const sortedInvoices = filteredInvoices.sort((a, b) => {
+        const firstOrderA = a.orderId[0] ? orders[a.orderId[0]] : null;
+        const firstOrderB = b.orderId[0] ? orders[b.orderId[0]] : null;
+
+        const dateA = firstOrderA ? new Date(firstOrderA.ordred) : new Date(0); // Default to epoch if no order
+        const dateB = firstOrderB ? new Date(firstOrderB.ordred) : new Date(0); // Default to epoch if no order
+
+        return dateB.getTime() - dateA.getTime(); // Sort descending (most recent first)
+    });
+
+    // Pagination
+    const totalRows = sortedInvoices.length;
     const totalPages = Math.ceil(totalRows / rowsPerPage);
-    const paginatedInvoices = filteredInvoices.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
+    const paginatedInvoices = sortedInvoices.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
+
+
 
     const formatFetchedAtDate = (fetchedAt: string) => {
         const date = new Date(fetchedAt);
@@ -145,18 +187,99 @@ const ListInvoice = () => {
     return (
         <div className="rounded-[10px] border border-stroke bg-white p-4 shadow-1 dark:border-dark-3 dark:bg-gray-dark dark:shadow-card sm:p-7.5">
             {/* Search Bar */}
-            <div className="mb-4 flex justify-between">
-                <input
-                    type="text"
-                    placeholder="Search by customer or invoice reference"
-                    value={searchTerm}
-                    onChange={(e) => {
-                        setSearchTerm(e.target.value);
-                        setCurrentPage(1);
-                    }}
-                    className="px-4 py-2 border rounded w-2/5"
-                />
+            <div className="flex justify-between items-center gap-4 md:gap-[19rem] w-full">
+                {/* Search Input */}
+                <div className="w-full md:w-2/5 flex items-center mb-4">
+                    <input
+                        type="text"
+                        placeholder="Search by customer or invoice reference"
+                        value={searchTerm}
+                        onChange={(e) => {
+                            setSearchTerm(e.target.value);
+                            setCurrentPage(1);
+                        }}
+                        className="w-full px-4 py-2 border border-gray-300 rounded focus:ring focus:ring-blue-300 transition duration-200"
+                    />
+                </div>
+
+                {/* Filters: Status, Date Range */}
+                <div className="w-full md:w-4/5 flex items-center float-end justify-end gap-4">
+                    {/* Status Filter */}
+                    <div className="w-full md:w-1/3 flex items-center gap-2 px-4 py-2 border border-gray-300 rounded">
+                        <svg
+                            viewBox="0 0 64 64"
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="24"
+                            height="24"
+                            className="text-gray-500"
+                        >
+                            <g transform="matrix(1,0,0,1,0,0)">
+                                <g id="Layer_64" data-name="Layer 64">
+                                    <path
+                                        d="m61.44 13.57-3-10a1.5 1.5 0 0 0 -1.44-1.07h-50a1.5 1.5 0 0 0 -1.44 1.07l-3 10a1.52 1.52 0 0 0 .24 1.33 1.49 1.49 0 0 0 1.2.6h56a1.49 1.49 0 0 0 1.2-.6 1.52 1.52 0 0 0 .24-1.33z"
+                                        fill="#b3b3b3"
+                                        fill-opacity="1"
+                                    />
+                                    <path
+                                        d="m61.35 13.34a1.51 1.51 0 0 0 -1.35-.84h-56a1.51 1.51 0 0 0 -1.35.84 1.49 1.49 0 0 0 .17 1.58l17.25 22.16v22.92a1.51 1.51 0 0 0 1.5 1.5 1.52 1.52 0 0 0 .66-.15l20.86-10.29a1.51 1.51 0 0 0 .84-1.35v-12.63l17.25-22.16a1.49 1.49 0 0 0 .17-1.58z"
+                                        fill="#ffac32"
+                                        fill-opacity="1"
+                                    />
+                                </g>
+                            </g>
+                        </svg>
+                        <span className="w-full text-sm text-gray-700">Filter avec:</span>
+                        <select
+                            id="statusFilter"
+                            value={selectedStatus}
+                            aria-placeholder="Status"
+                            onChange={(e) => {
+                                setSelectedStatus(e.target.value);
+                                setCurrentPage(1);
+                            }}
+                            className="w-full px-3 py-2 border rounded focus:ring focus:ring-blue-300"
+                        >
+                            <option value="all" defaultChecked>
+                                Tous
+                            </option>
+                            <option value="pending">Pending</option>
+                            <option value="paid">Payée</option>
+                            <option value="retour">Retour</option>
+                            <option value="credit">Credit</option>
+                        </select>
+                    </div>
+
+                    {/* Start Date Filter */}
+                    <div className="w-full md:w-1/3 relative flex items-center">
+                        <FaCalendarAlt className="absolute left-3 text-white-dark" />
+                        <DatePicker
+                            selected={startDate ?? undefined}
+                            onChange={(date) => setStartDate(date)}
+                            selectsStart
+                            startDate={startDate ?? undefined}
+                            endDate={endDate ?? undefined}
+                            placeholderText="Start Date"
+                            className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded focus:ring focus:ring-blue-300"
+                        />
+                    </div>
+
+                    {/* End Date Filter */}
+                    <div className="w-full md:w-1/3 relative flex items-center">
+                        <FaCalendarAlt className="absolute left-3 text-white-dark" />
+                        <DatePicker
+                            selected={endDate}
+                            onChange={(date) => setEndDate(date)}
+                            selectsEnd
+                            startDate={startDate ?? undefined}
+                            endDate={endDate ?? undefined}
+                            minDate={startDate ?? undefined}
+                            placeholderText="End Date"
+                            className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded focus:ring focus:ring-blue-300"
+                        />
+                    </div>
+                </div>
             </div>
+
 
             {/* Loading Indicator */}
             {loading ? (
@@ -189,6 +312,8 @@ const ListInvoice = () => {
                                 paginatedInvoices.map((invoice) => {
                                     const firstOrderId = invoice.orderId[0];
                                     const orderStatus = firstOrderId ? orders[firstOrderId]?.status || "N/A" : "N/A";
+                                    const ordredDate = firstOrderId ? orders[firstOrderId]?.ordred || "N/A" : "N/A";
+                                    const dueDate = firstOrderId ? orders[firstOrderId]?.dueDate || "N/A" : "N/A";
                                     const customerName = users[invoice.customerId]?.username || "N/A";
                                     const { backgroundColor, textColor } = getStatusStyles(orderStatus);
 
@@ -214,17 +339,15 @@ const ListInvoice = () => {
                                                 </span>
                                             </td>
                                             <td className="border-[#eee] px-4 py-4 dark:border-dark-3">
-                                                {formatFetchedAtDate(invoice.fetchedAt)}
+                                                {formatFetchedAtDate(ordredDate)}
                                             </td>
                                             <td className="border-[#eee] px-4 py-4 dark:border-dark-3">
-                                                {formatFetchedAtTime(invoice.fetchedAt)}
+                                                {formatFetchedAtTime(dueDate)}
                                             </td>
                                             <td className="border-[#eee] flex gap-2 px-4 py-4 dark:border-dark-3">
-                                                <Link href={`/invoice/detailinvoice/${invoice._id}`}>
-                                                    <button className="group bg-blue-200 cursor-pointer hover:bg-blue-400 text-white w-8 h-8 flex items-center justify-center rounded-full">
-                                                        <svg id="Layer_5" width="17" className="fill-blue-700 group-hover:fill-white" enable-background="new 0 0 31.7 19.3" viewBox="0 0 31.7 19.3" xmlns="http://www.w3.org/2000/svg"><path d="m15.9 19.3c6.5 0 12.6-3.5 15.9-9.2v-1c-5.1-8.8-16.3-11.8-25-6.7-2.9 1.7-5.2 4-6.8 6.8v1c3.3 5.6 9.3 9.1 15.9 9.1zm0-17.3c5.6 0 10.8 2.9 13.8 7.7-4.8 7.6-14.8 10-22.5 5.2-2.1-1.4-3.9-3.1-5.2-5.2 3-4.8 8.2-7.7 13.9-7.7z" /><path d="m15.9 15.7c3.3 0 6-2.7 6-6s-2.7-6-6-6-6 2.7-6 6 2.7 6 6 6zm0-10c2.2 0 4 1.8 4 4s-1.8 4-4 4-4-1.8-4-4 1.8-4 4-4z" /></svg>
-                                                    </button>
-                                                </Link>
+                                                <button onClick={handleOpenModal} className="group bg-blue-200 cursor-pointer hover:bg-blue-400 text-white w-8 h-8 flex items-center justify-center rounded-full">
+                                                    <svg id="Layer_5" width="17" className="fill-blue-700 group-hover:fill-white" enable-background="new 0 0 31.7 19.3" viewBox="0 0 31.7 19.3" xmlns="http://www.w3.org/2000/svg"><path d="m15.9 19.3c6.5 0 12.6-3.5 15.9-9.2v-1c-5.1-8.8-16.3-11.8-25-6.7-2.9 1.7-5.2 4-6.8 6.8v1c3.3 5.6 9.3 9.1 15.9 9.1zm0-17.3c5.6 0 10.8 2.9 13.8 7.7-4.8 7.6-14.8 10-22.5 5.2-2.1-1.4-3.9-3.1-5.2-5.2 3-4.8 8.2-7.7 13.9-7.7z" /><path d="m15.9 15.7c3.3 0 6-2.7 6-6s-2.7-6-6-6-6 2.7-6 6 2.7 6 6 6zm0-10c2.2 0 4 1.8 4 4s-1.8 4-4 4-4-1.8-4-4 1.8-4 4-4z" /></svg>
+                                                </button>
                                                 <button className="group bg-gray-200 cursor-pointer hover:bg-blue-400 text-white w-8 h-8 flex items-center justify-center rounded-full">
                                                     <svg id="Layer_2" width="19" className="fill-gray-700 group-hover:fill-white" enable-background="new 0 0 64 64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><path d="m50.3594 23.6494c-.0498-.1191-.1094-.2393-.1797-.3398-.0801-.1094-.1602-.21-.25-.3096-.75-.7402-2.0898-.7402-2.8301 0-.0898.0996-.1797.2002-.25.3096-.0693.1006-.1299.2207-.1797.3398-.0498.1201-.0898.25-.1201.3809-.0195.1191-.04.2598-.04.3896 0 .2598.0498.5195.1504.7598.0996.2402.25.46.4395.6504.3799.3799.8799.5898 1.4102.5898.1396 0 .2705-.0205.4004-.04.1201-.0303.25-.0703.3701-.1104.1191-.0498.2295-.1201.3398-.1895.1094-.0703.21-.1602.3096-.25.3799-.3799.5801-.8799.5801-1.4102 0-.1299-.0098-.2705-.04-.3896-.0197-.1308-.0597-.2607-.1105-.3808zm2.6406-8.4922h-5.3926v-5.5c0-1.9297-1.5703-3.5-3.5-3.5h-22.6201c-1.9297 0-3.5 1.5703-3.5 3.5v5.5h-6.9873c-3.0322 0-5.5 2.4678-5.5 5.5v19c0 3.0322 2.4678 5.5 5.5 5.5h6.9873v9.1855c0 1.9297 1.5703 3.5 3.5 3.5h22.6201c1.9297 0 3.5-1.5703 3.5-3.5v-9.1855h5.3926c3.0322 0 5.5-2.4678 5.5-5.5v-19c0-3.0322-2.4678-5.5-5.5-5.5zm-32.0127-5.5c0-.2754.2246-.5.5-.5h22.6201c.2754 0 .5.2246.5.5v5.5h-23.6201zm23.6201 44.6856c0 .2754-.2246.5-.5.5h-22.6201c-.2754 0-.5-.2246-.5-.5v-19.4121h23.6201zm10.8926-14.6856c0 1.3789-1.1211 2.5-2.5 2.5h-5.3926v-7.2266h3.3115c.8281 0 1.5-.6719 1.5-1.5s-.6719-1.5-1.5-1.5h-36.2431c-.8281 0-1.5.6719-1.5 1.5s.6719 1.5 1.5 1.5h3.3115v7.2266h-6.9873c-1.3789 0-2.5-1.1211-2.5-2.5v-19c0-1.3789 1.1211-2.5 2.5-2.5h42c1.3789 0 2.5 1.1211 2.5 2.5zm-31.2422 11.9756h12.249c.8281 0 1.5-.6719 1.5-1.5s-.6719-1.5-1.5-1.5h-12.249c-.8281 0-1.5.6719-1.5 1.5s.6719 1.5 1.5 1.5zm0-5.2461h8.5391c.8281 0 1.5-.6719 1.5-1.5s-.6719-1.5-1.5-1.5h-8.5391c-.8281 0-1.5.6719-1.5 1.5s.6719 1.5 1.5 1.5z" /></svg>
                                                 </button>
@@ -235,6 +358,11 @@ const ListInvoice = () => {
                                                     <svg width="17" className="fill-red-700 group-hover:fill-white" id="Layer_1" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" data-name="Layer 1"><path d="m456.806 82.685h-113.933v-25.343a57.408 57.408 0 0 0 -57.342-57.342h-61.209a57.408 57.408 0 0 0 -57.342 57.342v25.343h-111.786a16 16 0 0 0 0 32h4.4v308.294a89.121 89.121 0 0 0 89.024 89.021h214.764a89.122 89.122 0 0 0 89.018-89.021v-308.294h4.4a16 16 0 0 0 0-32zm-257.826-25.343a25.371 25.371 0 0 1 25.342-25.342h61.209a25.371 25.371 0 0 1 25.342 25.342v25.343h-111.893zm221.42 365.637a57.085 57.085 0 0 1 -57.018 57.021h-214.764a57.085 57.085 0 0 1 -57.018-57.021v-308.294h328.8zm-237.313-26.844v-197.585a16 16 0 0 1 32 0v197.585a16 16 0 0 1 -32 0zm113.826 0v-197.585a16 16 0 0 1 32 0v197.585a16 16 0 0 1 -32 0z" /></svg>
                                                 </button>
                                             </td>
+                                            <InvoiceDetailModal
+                                                open={showModal}
+                                                handleClose={handleCloseModal}
+                                                invoiceId={invoice._id}
+                                            />
                                         </tr>
                                     );
                                 })

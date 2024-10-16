@@ -19,6 +19,11 @@ interface ProductType {
     priceId: string; // Changed from string[] to string
 }
 
+type Item = {
+    quantity: number;
+    price: number;
+};
+
 
 
 interface ColorType {
@@ -36,9 +41,12 @@ interface InvoiceItem {
     price: number;
     productId: string;
     Refcolor: string;
-    colors: ColorType[];
-    searchTerm: string; // New field for individual search term
+    colors: ColorType[]; // Change this from never[] to ColorType[]
+    searchTerm: string;
+    profit: number; // Ensure this is included
 }
+
+
 
 const AddInvoice = () => {
 
@@ -54,6 +62,7 @@ const AddInvoice = () => {
             Refcolor: '',
             colors: [],
             searchTerm: '', // Initialize search term
+            profit: 0,
         },
     ]);
 
@@ -66,6 +75,9 @@ const AddInvoice = () => {
     const [tax, setTax] = useState<number>(0); // State for tax percentage
     const [promotion, setPromotion] = useState<number>(0); // State for promotion percentage
     const [transportPrice, setTransportPrice] = useState<number>(0); // State for transport price
+    const [ordredDate, setOrdredDate] = useState<string>('');
+    const [dueDate, setDueDate] = useState<string>('');
+    const [status, setStatus] = useState<string>('pending');
 
 
     useEffect(() => {
@@ -108,10 +120,7 @@ const AddInvoice = () => {
             if (productPriceId.length > 0) {
                 const firstProductPriceId = productPriceId;
 
-                // Add console log to check the priceId
-                console.log("Selected Price ID: ", firstProductPriceId);
-
-                fetchProductPrice(firstProductPriceId).then(price => {
+                fetchProductPrice(firstProductPriceId).then(({ price, profit }) => {
                     setItems(prevItems =>
                         prevItems.map(item =>
                             item._id === itemId
@@ -120,8 +129,9 @@ const AddInvoice = () => {
                                     productId: selectedProductId,
                                     title: selectedProduct.title,
                                     Refcolor: refColor,
-                                    colors: productColors,
-                                    price: price, // Set the fetched price here
+                                    colors: productColors, // This should now match the ColorType[]
+                                    price: price,
+                                    profit: profit,
                                 }
                                 : item
                         )
@@ -131,9 +141,17 @@ const AddInvoice = () => {
                 console.error("productPriceId is empty");
             }
         }
+
     };
 
-    const fetchProductPrice = async (productPriceId: string): Promise<number> => {
+
+    const getProductPrice = async (productId: string): Promise<number> => {
+        const response = await axios.get(`https://backendalaahd.onrender.com/api/products/${productId}`);
+        return response.data.priceId; // Assuming the price is returned in the response
+    };
+
+
+    const fetchProductPrice = async (productPriceId: string): Promise<{ price: number; profit: number }> => {
         try {
             const response = await fetch(`https://backendalaahd.onrender.com/api/prices/${productPriceId}`);
             if (!response.ok) {
@@ -143,21 +161,20 @@ const AddInvoice = () => {
             const productData = await response.json();
             console.log("Full Product Data: ", productData); // Log the entire response
 
-            // Check if 'price' exists in the response and log it
-            if (productData.price !== undefined) {
+            if (productData.price !== undefined && productData.profit !== undefined) { // Assuming profit is returned
                 console.log("Fetched Price: ", productData.price);
-                return productData.price;
+                console.log("Fetched Profit: ", productData.profit);
+                return { price: productData.price, profit: productData.profit }; // Return price and profit
             } else {
-                console.error("Price not found in the response");
-                return 0; // Return a default value if price is missing
+                console.error("Price or profit not found in the response");
+                return { price: 0, profit: 0 }; // Default values
             }
 
         } catch (error) {
             console.error('Error fetching product price:', error);
-            return 0; // Return a default value in case of error
+            return { price: 0, profit: 0 }; // Return default values
         }
     };
-
 
 
     const generateInvoiceRef = (): string => {
@@ -178,14 +195,22 @@ const AddInvoice = () => {
                 description: '',
                 rate: 0,
                 quantity: 0,
-                price: 0,
+                price: 0,      // Ensure price is set
+                total: 0,      // Initialize total field
+                discount: 0,   // Initialize discount field
                 productId: '',
                 Refcolor: '',
                 colors: [],
                 searchTerm: '', // Initialize search term for new item
+                profit: 0,     // Initialize profit field (if required)
+                ordred: new Date().toISOString().split('T')[0], // Initialize with today's date
+                dueDate: '',   // Set an appropriate due date if needed
+                status: 'pending',  // Set default status
+                note: '',      // Initialize note field
             },
         ]);
     };
+
 
     const removeItem = (id: number) => {
         setItems(prevItems => prevItems.filter(item => item._id !== id));
@@ -243,27 +268,122 @@ const AddInvoice = () => {
         setTransportPrice(isNaN(value) ? 0 : value); // Ensure transport is a number
     };
 
-    // Calculate subtotal, tax, promotion, transport dynamically
-    const calculateTotal = () => {
-        const subtotal = items.reduce((total, item) => total + item.quantity * item.price, 0);
-
-        // Apply tax and promotion
-        const taxAmount = (tax / 100) * subtotal;
-        const promotionAmount = (promotion / 100) * subtotal;
-
-        // Final total with tax, promotion, and transport
-        const total = (subtotal + taxAmount - promotionAmount) + transportPrice;
-
-        return {
-            subtotal: subtotal.toFixed(2),
-            taxAmount: taxAmount.toFixed(2),
-            promotionAmount: promotionAmount.toFixed(2),
-            total: total.toFixed(2),
-            transportPrice: transportPrice.toFixed(2),
-        };
+    const handleStatusChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+        setStatus(event.target.value);
     };
 
-    const totals = calculateTotal(); // Get all totals (subtotal, tax, promotion, final total)
+    // Calculate subtotal, tax, promotion, transport dynamically
+    const calculateTotal = (items: Item[]) => {
+        const subtotal = items.reduce((total: number, item: Item) => total + item.quantity * item.price, 0);
+        const taxAmount = (tax / 100) * subtotal;
+        const promotionAmount = (promotion / 100) * subtotal;
+        const total = (subtotal + taxAmount - promotionAmount) + transportPrice;
+      
+        return {
+          subtotal: subtotal.toFixed(2),
+          taxAmount: taxAmount.toFixed(2),
+          promotionAmount: promotionAmount.toFixed(2),
+          total: total.toFixed(2),
+          transportPrice: transportPrice.toFixed(2),
+        };
+      };
+
+    const totals = calculateTotal(items); // Get all totals (subtotal, tax, promotion, final total)
+
+    // Handle input change
+    const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = e.target;
+        if (name === 'inv-date') {
+            setOrdredDate(value); // Date de creation
+        } else if (name === 'due-date') {
+            setDueDate(value); // Date de fin
+        }
+    }
+
+    const generateOrderRef = (): string => {
+        const date = new Date();
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = String(date.getFullYear());
+        const randomNum = Math.floor(10 + Math.random() * 90); // Generates a 2-digit random number
+
+        // Construct the order reference
+        return `ORD-BL${randomNum}-${day}${month}${year}-${randomNum}`;
+    };
+
+    const calculateTotalProfit = (profit: number, quantity: number) => {
+        return profit * quantity; // Total profit is profit per item multiplied by quantity
+    };
+
+    console.log(calculateTotalProfit);
+
+
+
+    const insertOrders = async (items: InvoiceItem[]): Promise<string[]> => {
+        try {
+            const orderIds = await Promise.all(
+                items.map(async (item) => {
+                    const orderData = {
+                        refOrder: generateOrderRef(),
+                        totalProfit: calculateTotalProfit(item.profit, item.quantity),
+                        ordred: new Date(ordredDate).toISOString(),
+                        dueDate: new Date(dueDate).toISOString(),
+                        quantity: item.quantity,
+                        total: item.price * item.quantity,
+                        discount: promotion,
+                        status,
+                        note: item.description,
+                    };
+
+                    const response = await axios.post('https://backendalaahd.onrender.com/api/orders', orderData);  // Adjust your endpoint
+                    return response.data._id;  // Assuming you get back the order's _id
+                })
+            );
+
+            return orderIds;
+        } catch (error) {
+            console.error("Error inserting orders:", error);
+            throw new Error("Failed to insert orders");
+        }
+    };
+
+    const insertInvoice = async (orderIds: string[], items: InvoiceItem[]) => {
+        try {
+            // Call the calculateTotal function to get the total value
+            const totals = calculateTotal(items);  // Ensure calculateTotal accepts and processes the items
+
+            const invoiceData = {
+                invoiceRef: generateInvoiceRef(),  // Function to generate your invoice ref
+                orderId: orderIds,  // Insert orderId array
+                customerId: customerId,  // Assuming customerId is already set
+                adminId: 'adminId_here',  // Replace with the correct admin ID
+                productId: items.map(item => item.productId),  // Insert productId array
+                total: parseFloat(totals.total),  // Ensure the total is a number
+                type: typeFacturation,  // Example type
+            };
+
+            const response = await axios.post('https://backendalaahd.onrender.com/api/invoices', invoiceData);  // Adjust your endpoint
+            console.log("Invoice inserted successfully:", response.data);
+        } catch (error) {
+            console.error("Error inserting invoice:", error);
+            throw new Error("Failed to insert invoice");
+        }
+    };
+
+
+
+    const handleSubmit = async () => {
+        try {
+            const orderIds = await insertOrders(items);
+            await insertInvoice(orderIds, items);
+            alert("Facture et commandes créées avec succès");
+        } catch (error) {
+            console.error("Erreur lors de la soumission:", error);
+            alert("Une erreur est survenue lors de la soumission. Veuillez réessayer.");
+        }
+    };
+
+
 
 
     return (
@@ -315,13 +435,27 @@ const AddInvoice = () => {
                             <label htmlFor="startDate" className="text-left flex-1 ltr:mr-2 rtl:ml-2 mb-0">
                                 Date de creation
                             </label>
-                            <input id="startDate" type="date" name="inv-date" className="form-input lg:w-[250px] w-2/3" />
+                            <input
+                                id="startDate"
+                                type="date"
+                                name="inv-date"
+                                value={ordredDate}
+                                onChange={handleDateChange}
+                                className="form-input lg:w-[250px] w-2/3"
+                            />
                         </div>
                         <div className="flex gap-2 flex-col items-center sm:flex-row mt-4">
                             <label htmlFor="dueDate" className="text-left flex-1 ltr:mr-2 rtl:ml-2 mb-0">
                                 Date de fin
                             </label>
-                            <input id="dueDate" type="date" name="due-date" className="form-input lg:w-[250px] w-2/3" />
+                            <input
+                                id="dueDate"
+                                type="date"
+                                name="due-date"
+                                value={dueDate}
+                                onChange={handleDateChange}
+                                className="form-input lg:w-[250px] w-2/3"
+                            />
                         </div>
                     </div>
                 </div>
@@ -472,18 +606,6 @@ const AddInvoice = () => {
                     <div className="mt-4">
                         <div className="grid sm:grid-cols-2 grid-cols-1 gap-4">
                             <div>
-                                <label htmlFor="tax">Tax(%)</label>
-                                <input
-                                    id="tax"
-                                    type="number"
-                                    name="tax"
-                                    className="form-input"
-                                    value={tax}
-                                    onChange={handleTaxChange} // Update tax on input change
-                                    placeholder="Tax"
-                                />
-                            </div>
-                            <div>
                                 <label htmlFor="discount">Promotion(%)</label>
                                 <input
                                     id="discount"
@@ -495,29 +617,36 @@ const AddInvoice = () => {
                                     placeholder="Promotion"
                                 />
                             </div>
-                        </div>
-                        <div>
-                            <label htmlFor="transport">Transport Price(DH)</label>
-                            <input
-                                id="transport"
-                                type="number"
-                                name="transport"
-                                className="form-input"
-                                value={transportPrice}
-                                onChange={handleTransportChange} // Update transport on input change
-                                placeholder="Transport Price"
-                            />
+                            <div>
+                                <label htmlFor="transport">Transport Price(DH)</label>
+                                <input
+                                    id="transport"
+                                    type="number"
+                                    name="transport"
+                                    className="form-input"
+                                    value={transportPrice}
+                                    onChange={handleTransportChange} // Update transport on input change
+                                    placeholder="Transport Price"
+                                />
+                            </div>
                         </div>
                     </div>
                     <div className="mt-4">
                         <label htmlFor="payment-method">Status Facturation</label>
-                        <select id="payment-method" name="payment-method" className="form-select">
-                            <option id='payment-method' value="pending" defaultChecked>En cours</option>
-                            <option id='payment-method' value="paid">Payée</option>
-                            <option id='payment-method' value="credit">Credit</option>
-                            <option id='payment-method' value="cancel">Eliminer</option>
+                        <select
+                            id="payment-method"
+                            name="payment-method"
+                            className="form-select"
+                            value={status} // Set the selected value
+                            onChange={handleStatusChange} // Capture the selected value
+                        >
+                            <option value="pending">En cours</option>
+                            <option value="paid">Payée</option>
+                            <option value="credit">Credit</option>
+                            <option value="cancel">Eliminer</option>
                         </select>
                     </div>
+
                 </div>
                 <div className="panel">
                     <div className="grid xl:grid-cols-1 lg:grid-cols-4 sm:grid-cols-2 grid-cols-1 gap-4">
@@ -530,7 +659,7 @@ const AddInvoice = () => {
                         )}
 
 
-                        <button type="button" className="btn btn-success w-full gap-2">
+                        <button type="button" onClick={handleSubmit} className="btn btn-success w-full gap-2">
                             {/* <IconSave className="ltr:mr-2 rtl:ml-2 shrink-0" /> */}
                             Enregistre
                         </button>
