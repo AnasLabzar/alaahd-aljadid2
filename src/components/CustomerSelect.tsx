@@ -18,9 +18,9 @@ const CustomerSelect: React.FC<CustomerSelectProps> = ({ onCustomerChange, id })
     useEffect(() => {
         const fetchCustomers = async () => {
             try {
-                const response = await axios.get('https://backendalaahd.onrender.com/api/users');
-                const customRoleUsers = response.data.filter((user: any) => user.role === 'custom'); // Type the response if possible
-                setCustomers(customRoleUsers); 
+                const response = await axios.get('https://backendalaahd.onrender.com/api/users/custom');
+                // const customRoleUsers = response.data.filter((user: any) => user.role === 'custom'); // Type the response if possible
+                setCustomers(response); 
             } catch (error) {
                 console.error('Error fetching customers:', error);
             }
