@@ -20,7 +20,7 @@ const CustomerSelect: React.FC<CustomerSelectProps> = ({ onCustomerChange, id })
             try {
                 const response = await axios.get('https://backendalaahd.onrender.com/api/users/custom');
                 // const customRoleUsers = response.data.filter((user: any) => user.role === 'custom'); // Type the response if possible
-                setCustomers(response); 
+                setCustomers(response.data); 
             } catch (error) {
                 console.error('Error fetching customers:', error);
             }
