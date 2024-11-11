@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, FormEvent } from "react";
 import Link from "next/link";
 import GoogleSigninButton from "../GoogleSigninButton";
 import SigninWithPassword from "../SigninWithPassword";
@@ -37,7 +37,7 @@ export default function Signin() {
   const [error, setError] = useState("");
 
   // Handle form submission
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleLogin = async (e: FormEvent) => {
     e.preventDefault();
 
     if (!email || !password) {
@@ -68,7 +68,7 @@ export default function Signin() {
       </div>
 
       <div>
-        {/* Handle SignIn with Password */}
+        {/* Pass onSubmit prop */}
         <SigninWithPassword onSubmit={handleLogin} />
 
         {/* Error message */}
