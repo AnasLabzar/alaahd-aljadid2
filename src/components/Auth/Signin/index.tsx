@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import GoogleSigninButton from "../GoogleSigninButton";
 import SigninWithPassword from "../SigninWithPassword";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 
 // API login call function using axios
 const loginUser = async (email: string, password: string) => {
@@ -20,8 +20,13 @@ const loginUser = async (email: string, password: string) => {
     document.cookie = `ANAS-AUTH=${sessionToken}; path=/; secure; HttpOnly`; // Secure and HttpOnly flags for cookies
 
     return response.data; // Return the user data
-  } catch (error) {
-    console.error("Login failed:", error.response ? error.response.data : error.message);
+  } catch (error: unknown) {
+    // Type guard: Check if the error is an instance of AxiosError
+    if (axios.isAxiosError(error)) {
+      console.error("Login failed:", error.response ? error.response.data : error.message);
+    } else {
+      console.error("Unexpected error:", error);
+    }
     throw new Error("Invalid credentials or error during login");
   }
 };
