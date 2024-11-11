@@ -1,18 +1,24 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import ClickOutside from "@/components/ClickOutside";
 
 const DropdownUser = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [isClient, setIsClient] = useState(false); // New state to check if we are in the client
 
   const userData = JSON.parse(sessionStorage.getItem('user-info') || '{}');
 
-  // Function to handle logout
+  // Ensure window is only accessed in the client
+  useEffect(() => {
+    setIsClient(true); // Set to true once the component has mounted in the client
+  }, []);
+
   const handleLogout = () => {
-    sessionStorage.clear(); // Clear all session storage
-    // Optionally, you can redirect the user to the homepage or login page
-    window.location.href = "/"; // Redirect to homepage
+    if (isClient) {
+      sessionStorage.clear(); // Clear all session storage only on the client
+      window.location.href = "/"; // Redirect to homepage on the client side
+    }
   };
 
   return (
@@ -57,7 +63,7 @@ const DropdownUser = () => {
         </span>
       </Link>
 
-      {/* <!-- Dropdown Content --> */}
+      {/* Dropdown Content */}
       {dropdownOpen && (
         <div
           className={`absolute right-0 mt-7.5 flex w-[280px] flex-col rounded-lg border-[0.5px] border-stroke bg-white shadow-default dark:border-dark-3 dark:bg-gray-dark`}
@@ -111,7 +117,7 @@ const DropdownUser = () => {
                   <path
                     fillRule="evenodd"
                     clipRule="evenodd"
-                    d="M8.99998 9.1875C7.26482 9.1875 5.66617 9.58191 4.48157 10.2483C3.31459 10.9047 2.43748 11.8995 2.43748 13.125L2.43743 13.2015C2.43658 14.0729 2.43552 15.1665 3.39479 15.9477C3.86689 16.3321 4.52734 16.6055 5.41964 16.7861C6.31442 16.9672 7.48065 17.0625 8.99998 17.0625C10.5193 17.0625 11.6855 16.9672 12.5803 16.7861C13.4726 16.6055 14.1331 16.3321 14.6052 15.9477C15.5644 15.1665 15.5634 14.0729 15.5625 13.2015L15.5625 13.125C15.5625 11.8995 14.6854 10.9047 13.5184 10.2483C12.3338 9.58191 10.7351 9.1875 8.99998 9.1875ZM3.56248 13.125C3.56248 12.4865 4.02851 11.7939 5.03311 11.2288C6.02008 10.6736 7.42143 10.3125 8.99998 10.3125C10.5785 10.3125 11.9799 10.6736 12.9668 11.2288C13.9714 11.7939 14.4375 12.4865 14.4375 13.125C14.4375 14.1059 14.4072 14.658 13.8948 15.0753C13.6169 15.3016 13.1523 15.5225 12.3571 15.6835C11.5644 15.8439 10.4806 15.9375 8.99998 15.9375C7.51931 15.9375 6.43553 15.8439 5.64282 15.6835C4.84762 15.5225 4.38307 15.3016 4.10517 15.0753C3.59276 14.658 3.56248 14.1059 3.56248 13.125Z"
+                    d="M8.99998 9.1875C7.26482 9.1875 5.66617 9.58191 4.48157 10.2483C3.31459 10.9047 2.43748 11.8995 2.43748 13.125L2.43743 13.2015C2.43658 14.0729 2.43552 15.1665 3.39479 15.9477C3.86689 16.3321 4.52734 16.6055 5.41964 16.7861C6.31442 16.9672 7.48065 17.0625 8.99998 17.0625C10.5193 17.0625 11.6855 16.9672 12.5803 16.7861C13.4726 16.6055 14.1331 16.3321 14.6052 15.9477C15.5644 15.1665 15.5634 14.0729 15.5625 13.2015L15.5625 13.125C15.5625 11.8995 14.6854 10.9047 13.5184 10.2483C12.3338 9.58191 10.7351 9.1875 8.99998 9.1875ZM3.56248 13.125C3.56248 12.4865 4.02851 11.7939 5.03311 11.2288C6.02008 10.6736 7.42143 10.3125 8.99998 10.3125C10.5785 10.3125 11.9799 10.6736 12.9668 11.2288C13.9714 11.7939 14.4375 12.4865 14.4375 13.125C14.4375 14.1059 14.4072 14.658 13.8948 15.0753C13.412 15.5928 12.5797 15.8197 11.7771 15.6197C10.9744 15.4197 10.3037 14.8697 9.99998 14.1059C9.69623 13.3421 9.69623 12.6579 9.99998 11.8941C10.3037 11.1303 10.9744 10.5803 11.7771 10.3803C12.5797 10.1803 13.412 10.4072 13.8948 10.8247C14.4072 11.2425 14.4375 11.7945 14.4375 12.875C14.4375 12.1012 13.8469 11.2999 12.9312 10.8617C12.0164 10.4234 10.7167 10.3125 8.99998 10.3125C7.28323 10.3125 5.98353 10.4234 5.06874 10.8617C4.15396 11.2999 3.56248 12.1012 3.56248 13.125Z"
                     fill=""
                   />
                 </svg>
