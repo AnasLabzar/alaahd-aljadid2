@@ -3,7 +3,6 @@
 // pages/add-invoice.tsx
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-import Image from "next/image";
 import { SelectChangeEvent } from '@mui/material';
 import { ChangeEvent } from 'react';
 
@@ -279,15 +278,15 @@ const AddInvoice = () => {
         const taxAmount = (tax / 100) * subtotal;
         const promotionAmount = (promotion / 100) * subtotal;
         const total = (subtotal + taxAmount - promotionAmount) + transportPrice;
-
+      
         return {
-            subtotal: subtotal.toFixed(2),
-            taxAmount: taxAmount.toFixed(2),
-            promotionAmount: promotionAmount.toFixed(2),
-            total: total.toFixed(2),
-            transportPrice: transportPrice.toFixed(2),
+          subtotal: subtotal.toFixed(2),
+          taxAmount: taxAmount.toFixed(2),
+          promotionAmount: promotionAmount.toFixed(2),
+          total: total.toFixed(2),
+          transportPrice: transportPrice.toFixed(2),
         };
-    };
+      };
 
     const totals = calculateTotal(items); // Get all totals (subtotal, tax, promotion, final total)
 
@@ -393,22 +392,7 @@ const AddInvoice = () => {
                 <div className="flex justify-between flex-wrap px-4">
                     <div className="mb-6 lg:w-1/2 w-full">
                         <div className="flex items-center text-black dark:text-white shrink-0">
-                            <Image
-                                width={70}
-                                height={70}
-                                src={"/images/logo/logo.png"}
-                                alt="Logo"
-                                priority
-                                className="dark:hidden"
-                            />
-                            <Image
-                                width={70}
-                                height={70}
-                                src={"/images/logo/logo-h.png"}
-                                alt="Logo"
-                                priority
-                                className="hidden dark:block"
-                            />
+                            <img src="/images/logo/logo.png" alt="img" className="w-20" />
                         </div>
                         <div className="space-y-1 mt-6 text-gray-500 dark:text-gray-400">
                             <div>El Gouassem, Route de l'ourika, Marrakech-safi</div>

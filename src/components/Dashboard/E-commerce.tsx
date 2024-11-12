@@ -7,17 +7,8 @@ import TableOne from "../Tables/TableOne";
 import MapOne from "../Maps/MapOne";
 import DataStatsOne from "@/components/DataStats/DataStatsOne";
 import ChartOne from "@/components/Charts/ChartOne";
-import { useRouter } from "next/navigation";
-import { isAuthenticated } from "../utils/auth";
 
 const ECommerce: React.FC = () => {
-
-  const router = useRouter();
-
-  if (!isAuthenticated()) {
-    router.push("/"); // This triggers reloading of the Home component
-  }
-
   return (
     <>
       <DataStatsOne />

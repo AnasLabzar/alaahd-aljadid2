@@ -10,14 +10,14 @@ const SignIn: React.FC = () => {
         <div className="flex flex-col items-center">
           <Link href="/">
             <Image
-              src="/images/logo/logo-dark.png"
+              src="/images/logo/logo-horizontal.png"
               alt="Logo"
               width={176}
               height={32}
               className="dark:hidden"
             />
             <Image
-              src="/images/logo/logo-light.png"
+              src="/images/logo/logo-horizontal-light.png"
               alt="Logo"
               width={176}
               height={32}

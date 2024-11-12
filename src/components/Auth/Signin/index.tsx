@@ -6,7 +6,24 @@ import GoogleSigninButton from "../GoogleSigninButton";
 import SigninWithPassword from "../SigninWithPassword";
 import axios, { AxiosError } from "axios";
 
-// Fonction d'appel API pour la connexion utilisateur avec axios
+// Store user object in cookie (expire in 1 day)
+const setCookie = (name: string, value: string, days: number) => {
+  const date = new Date();
+  date.setTime(date.getTime() + days * 24 * 60 * 60 * 1000); // Set cookie expiry date
+  const expires = `expires=${date.toUTCString()}`;
+  document.cookie = `${name}=${value}; ${expires}; path=/; secure; HttpOnly`; // HttpOnly for added security, secure for HTTPS
+};
+
+// Assuming `user` and `sessionToken` are returned from the login API
+const setUserInfoInCookies = (user: any, sessionToken: string) => {
+  // Store user object in a cookie (serialize to string)
+  setCookie('user-info', JSON.stringify(user), 1);  // Expiry of 1 day
+
+  // Store session token in cookie
+  setCookie('ANAS-AUTH', sessionToken, 1);  // Expiry of 1 day
+};
+
+// Example usage after successful login:
 const loginUser = async (email: string, password: string) => {
   try {
     const response = await axios.post("https://backendalaahd.onrender.com/api/auth/login/", {
@@ -14,19 +31,16 @@ const loginUser = async (email: string, password: string) => {
       password,
     });
 
+    // Assuming response contains the user object and sessionToken
     const { sessionToken } = response.data.authentication;
-    // Récupérer les données de l'utilisateur avec l'objet d'authentification
-    const user = response.data;  // Supposons que l'utilisateur fasse partie de la réponse
+    const { user } = response.data;
 
-    // Stocker l'objet utilisateur complet dans sessionStorage
-    sessionStorage.setItem('user-info', JSON.stringify(user));  // Stocker l'objet utilisateur complet
-
-    // Stocker le jeton de session dans sessionStorage
-    sessionStorage.setItem('ANAS-AUTH', sessionToken);
-
-    // Afficher dans la console pour vérifier si c'est stocké
-    console.log('Jeton de session stocké dans sessionStorage:', sessionStorage.getItem('ANAS-AUTH'));
+    console.log("user",  response.data);
     
+
+    // Store the data in cookies
+    setUserInfoInCookies(user, sessionToken);
+
     return response.data;
   } catch (error: unknown) {
     if (axios.isAxiosError(error)) {
@@ -38,13 +52,13 @@ const loginUser = async (email: string, password: string) => {
   }
 };
 
-
 export default function Signin() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [darkMode, setDarkMode] = useState(false); // État pour gérer le mode sombre
   const router = useRouter();
+  const [isLoggedIn, setIsLoggedIn] = useState(false); // Local state to control the redirect
 
   // Gérer la soumission du formulaire
   const handleLogin = async (email: string, password: string) => {
@@ -57,13 +71,20 @@ export default function Signin() {
 
     try {
       await loginUser(email, password);
+      setIsLoggedIn(true); // Set the logged-in state to true
 
-      // Après une connexion réussie, rafraîchir la page actuelle (Accueil)
-      router.push("/"); // Cela déclenche le rechargement du composant Accueil
     } catch (err) {
       setError("Identifiants invalides ou erreur lors de la connexion");
     }
   };
+
+  // Use useEffect to perform the redirection after login
+  useEffect(() => {
+    if (typeof window !== "undefined" && isLoggedIn) {
+      // After login, redirect to the home page
+      router.push("/");
+    }
+  }, [isLoggedIn, router]); // Only run the effect when `isLoggedIn` changes
 
   // Utiliser useEffect pour mettre à jour la classe du corps pour le mode sombre
   useEffect(() => {
