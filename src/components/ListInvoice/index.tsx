@@ -7,6 +7,11 @@ import DatePicker from "react-datepicker"; // Import DatePicker
 import "react-datepicker/dist/react-datepicker.css"; // Import DatePicker styles
 import { FaCalendarAlt } from "react-icons/fa"; // Import the calendar icon from react-icons
 import InvoiceDetailModal from "../Modal/ModalInvoice";
+import Swal from 'sweetalert2';
+import ReactDOM from 'react-dom';
+import InvoiceTemplate from "@/components/Template/invoice.template";
+import { log } from "util";
+
 
 
 
@@ -56,6 +61,33 @@ const ListInvoice = () => {
     const handleCloseModal = () => {
         setShowModal(false);
     };
+
+    const handleReadMore = (invoiceId: string) => {
+        console.log("dkhl l reead");
+
+        const isDarkMode = document.documentElement.classList.contains('dark');  // Check if dark mode is enabled
+
+        // Trigger Swal with dark mode conditionally applied
+        Swal.fire({
+            html: `<div><InvoiceTemplate invoiceId="${invoiceId}" /></div>`,  // The InvoiceTemplate will be rendered in the Swal modal
+            showCloseButton: true,
+            showConfirmButton: false,
+            didOpen: () => {
+                // Dynamically render the InvoiceTemplate inside Swal2
+                const target = document.querySelector('.swal2-html-container');
+
+                // Render the React component into the Swal container
+                ReactDOM.render(<InvoiceTemplate invoiceId={invoiceId} />, target);
+
+                // Apply the dark class to the Swal modal if dark mode is active
+                if (isDarkMode) {
+                    const swalContainer = document.querySelector('.swal2-popup');
+                    swalContainer?.classList.add('dark');  // Adding the 'dark' class to Swal container
+                }
+            },
+        });
+    }
+
 
     useEffect(() => {
         const fetchInvoices = async () => {
@@ -359,9 +391,16 @@ const ListInvoice = () => {
                                                 {formatFetchedAtTime(dueDate)}
                                             </td>
                                             <td className="border-[#eee] flex gap-2 px-4 py-4 dark:border-dark-3">
-                                                <button onClick={handleOpenModal} className="group bg-blue-200 cursor-pointer hover:bg-blue-400 text-white w-8 h-8 flex items-center justify-center rounded-full">
-                                                    <svg id="Layer_5" width="17" className="fill-blue-700 group-hover:fill-white" enable-background="new 0 0 31.7 19.3" viewBox="0 0 31.7 19.3" xmlns="http://www.w3.org/2000/svg"><path d="m15.9 19.3c6.5 0 12.6-3.5 15.9-9.2v-1c-5.1-8.8-16.3-11.8-25-6.7-2.9 1.7-5.2 4-6.8 6.8v1c3.3 5.6 9.3 9.1 15.9 9.1zm0-17.3c5.6 0 10.8 2.9 13.8 7.7-4.8 7.6-14.8 10-22.5 5.2-2.1-1.4-3.9-3.1-5.2-5.2 3-4.8 8.2-7.7 13.9-7.7z" /><path d="m15.9 15.7c3.3 0 6-2.7 6-6s-2.7-6-6-6-6 2.7-6 6 2.7 6 6 6zm0-10c2.2 0 4 1.8 4 4s-1.8 4-4 4-4-1.8-4-4 1.8-4 4-4z" /></svg>
+                                                <button
+                                                    onClick={() => handleReadMore(invoice._id)}
+                                                    className="group bg-blue-200 cursor-pointer hover:bg-blue-400 text-white w-8 h-8 flex items-center justify-center rounded-full"
+                                                >
+                                                    <svg id="Layer_5" width="17" className="fill-blue-700 group-hover:fill-white" enable-background="new 0 0 31.7 19.3" viewBox="0 0 31.7 19.3" xmlns="http://www.w3.org/2000/svg">
+                                                        <path d="m15.9 19.3c6.5 0 12.6-3.5 15.9-9.2v-1c-5.1-8.8-16.3-11.8-25-6.7-2.9 1.7-5.2 4-6.8 6.8v1c3.3 5.6 9.3 9.1 15.9 9.1zm0-17.3c5.6 0 10.8 2.9 13.8 7.7-4.8 7.6-14.8 10-22.5 5.2-2.1-1.4-3.9-3.1-5.2-5.2 3-4.8 8.2-7.7 13.9-7.7z" />
+                                                        <path d="m15.9 15.7c3.3 0 6-2.7 6-6s-2.7-6-6-6-6 2.7-6 6 2.7 6 6 6zm0-10c2.2 0 4 1.8 4 4s-1.8 4-4 4-4-1.8-4-4 1.8-4 4-4z" />
+                                                    </svg>
                                                 </button>
+
                                                 <button className="group bg-gray-200 cursor-pointer hover:bg-blue-400 text-white w-8 h-8 flex items-center justify-center rounded-full">
                                                     <svg id="Layer_2" width="19" className="fill-gray-700 group-hover:fill-white" enable-background="new 0 0 64 64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><path d="m50.3594 23.6494c-.0498-.1191-.1094-.2393-.1797-.3398-.0801-.1094-.1602-.21-.25-.3096-.75-.7402-2.0898-.7402-2.8301 0-.0898.0996-.1797.2002-.25.3096-.0693.1006-.1299.2207-.1797.3398-.0498.1201-.0898.25-.1201.3809-.0195.1191-.04.2598-.04.3896 0 .2598.0498.5195.1504.7598.0996.2402.25.46.4395.6504.3799.3799.8799.5898 1.4102.5898.1396 0 .2705-.0205.4004-.04.1201-.0303.25-.0703.3701-.1104.1191-.0498.2295-.1201.3398-.1895.1094-.0703.21-.1602.3096-.25.3799-.3799.5801-.8799.5801-1.4102 0-.1299-.0098-.2705-.04-.3896-.0197-.1308-.0597-.2607-.1105-.3808zm2.6406-8.4922h-5.3926v-5.5c0-1.9297-1.5703-3.5-3.5-3.5h-22.6201c-1.9297 0-3.5 1.5703-3.5 3.5v5.5h-6.9873c-3.0322 0-5.5 2.4678-5.5 5.5v19c0 3.0322 2.4678 5.5 5.5 5.5h6.9873v9.1855c0 1.9297 1.5703 3.5 3.5 3.5h22.6201c1.9297 0 3.5-1.5703 3.5-3.5v-9.1855h5.3926c3.0322 0 5.5-2.4678 5.5-5.5v-19c0-3.0322-2.4678-5.5-5.5-5.5zm-32.0127-5.5c0-.2754.2246-.5.5-.5h22.6201c.2754 0 .5.2246.5.5v5.5h-23.6201zm23.6201 44.6856c0 .2754-.2246.5-.5.5h-22.6201c-.2754 0-.5-.2246-.5-.5v-19.4121h23.6201zm10.8926-14.6856c0 1.3789-1.1211 2.5-2.5 2.5h-5.3926v-7.2266h3.3115c.8281 0 1.5-.6719 1.5-1.5s-.6719-1.5-1.5-1.5h-36.2431c-.8281 0-1.5.6719-1.5 1.5s.6719 1.5 1.5 1.5h3.3115v7.2266h-6.9873c-1.3789 0-2.5-1.1211-2.5-2.5v-19c0-1.3789 1.1211-2.5 2.5-2.5h42c1.3789 0 2.5 1.1211 2.5 2.5zm-31.2422 11.9756h12.249c.8281 0 1.5-.6719 1.5-1.5s-.6719-1.5-1.5-1.5h-12.249c-.8281 0-1.5.6719-1.5 1.5s.6719 1.5 1.5 1.5zm0-5.2461h8.5391c.8281 0 1.5-.6719 1.5-1.5s-.6719-1.5-1.5-1.5h-8.5391c-.8281 0-1.5.6719-1.5 1.5s.6719 1.5 1.5 1.5z" /></svg>
                                                 </button>
@@ -372,11 +411,11 @@ const ListInvoice = () => {
                                                     <svg width="17" className="fill-red-700 group-hover:fill-white" id="Layer_1" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" data-name="Layer 1"><path d="m456.806 82.685h-113.933v-25.343a57.408 57.408 0 0 0 -57.342-57.342h-61.209a57.408 57.408 0 0 0 -57.342 57.342v25.343h-111.786a16 16 0 0 0 0 32h4.4v308.294a89.121 89.121 0 0 0 89.024 89.021h214.764a89.122 89.122 0 0 0 89.018-89.021v-308.294h4.4a16 16 0 0 0 0-32zm-257.826-25.343a25.371 25.371 0 0 1 25.342-25.342h61.209a25.371 25.371 0 0 1 25.342 25.342v25.343h-111.893zm221.42 365.637a57.085 57.085 0 0 1 -57.018 57.021h-214.764a57.085 57.085 0 0 1 -57.018-57.021v-308.294h328.8zm-237.313-26.844v-197.585a16 16 0 0 1 32 0v197.585a16 16 0 0 1 -32 0zm113.826 0v-197.585a16 16 0 0 1 32 0v197.585a16 16 0 0 1 -32 0z" /></svg>
                                                 </button>
                                             </td>
-                                            <InvoiceDetailModal
+                                            {/* <InvoiceDetailModal
                                                 open={showModal}
                                                 handleClose={handleCloseModal}
                                                 invoiceId={invoice._id}
-                                            />
+                                            /> */}
                                         </tr>
                                     );
                                 })
