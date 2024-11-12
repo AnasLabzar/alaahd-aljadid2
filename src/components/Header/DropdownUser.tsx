@@ -5,7 +5,6 @@ import ClickOutside from "@/components/ClickOutside";
 
 const DropdownUser = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
-
   const [username, setUsername] = useState<string | null>(null);
   const [email, setEmail] = useState<string | null>(null);
 
@@ -20,7 +19,6 @@ const DropdownUser = () => {
 
     // Get the `user-info` cookie value
     const userInfoCookie = getCookie('user-info');
-    const AuthTokenCookie = getCookie('AUTH-ANAS');
 
     // Parse it as JSON to access `username`
     if (userInfoCookie) {
@@ -36,6 +34,22 @@ const DropdownUser = () => {
     }
   }, []);
 
+  const deleteAllCookies = () => {
+    // Get all cookies
+    const cookies = document.cookie.split(";");
+    console.log("hahowa", cookies);
+    
+
+    // Loop through the cookies and delete each one
+    cookies.forEach(cookie => {
+      const cookieName = cookie.split("=")[0].trim();
+      // Set the cookie with an expiration date in the past
+      document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+    });
+
+    // Refresh the page after clearing cookies
+    window.location.reload();
+  };
 
   return (
     <ClickOutside onClick={() => setDropdownOpen(false)} className="relative">
@@ -59,7 +73,9 @@ const DropdownUser = () => {
         </span>
 
         <span className="flex items-center gap-2 font-medium text-dark dark:text-dark-6">
-          <span className="hidden lg:block"> {username}</span>
+          <span className="hidden lg:block">
+            {username ? username : "Guest"} {/* Fallback to 'Guest' if username is missing */}
+          </span>
 
           <svg
             className={`fill-current duration-200 ease-in ${dropdownOpen && "rotate-180"}`}
@@ -172,7 +188,7 @@ const DropdownUser = () => {
             </li>
           </ul>
           <div className="p-2.5">
-            <button className="flex w-full items-center gap-2.5 rounded-[7px] p-2.5 text-sm font-medium text-dark-2 duration-300 ease-in-out hover:bg-gray-2 hover:text-dark dark:text-dark-6 dark:hover:bg-dark-3 dark:hover:text-white lg:text-base">
+            <button onClick={deleteAllCookies} className="flex w-full items-center gap-2.5 rounded-[7px] p-2.5 text-sm font-medium text-dark-2 duration-300 ease-in-out hover:bg-gray-2 hover:text-dark dark:text-dark-6 dark:hover:bg-dark-3 dark:hover:text-white lg:text-base">
               <svg
                 className="fill-current"
                 width="18"
