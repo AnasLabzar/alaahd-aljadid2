@@ -4,23 +4,26 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import GoogleSigninButton from "../GoogleSigninButton";
 import SigninWithPassword from "../SigninWithPassword";
-import axios, { AxiosError } from "axios";
+import axios from "axios";
+import AuthenticatedLayout from "@/components/AuthenticatedLayout";
 
-// Store user object in cookie (expire in 1 day)
+// Updated cookie-setting function without HttpOnly
 const setCookie = (name: string, value: string, days: number) => {
   const date = new Date();
   date.setTime(date.getTime() + days * 24 * 60 * 60 * 1000); // Set cookie expiry date
   const expires = `expires=${date.toUTCString()}`;
-  document.cookie = `${name}=${value}; ${expires}; path=/; secure; HttpOnly`; // HttpOnly for added security, secure for HTTPS
+  document.cookie = `${name}=${value}; ${expires}; path=/; secure`; // Secure for HTTPS, removed HttpOnly
 };
 
-// Assuming `user` and `sessionToken` are returned from the login API
-const setUserInfoInCookies = (user: any, sessionToken: string) => {
-  // Store user object in a cookie (serialize to string)
-  setCookie('user-info', JSON.stringify(user), 1);  // Expiry of 1 day
+// Function to store user data in cookies
+const setUserInfoInCookies = (userData: any, sessionToken: string) => {
+  // Store user object in cookie (serialized to a JSON string)
+  setCookie('user-info', JSON.stringify(userData), 1);  // Expiry of 1 day
+  console.log("User added to cookie:", userData);
 
   // Store session token in cookie
   setCookie('ANAS-AUTH', sessionToken, 1);  // Expiry of 1 day
+  console.log("Session token added to cookie:", sessionToken);
 };
 
 // Example usage after successful login:
@@ -33,16 +36,15 @@ const loginUser = async (email: string, password: string) => {
 
     // Assuming response contains the user object and sessionToken
     const { sessionToken } = response.data.authentication;
-    const { user } = response.data;
+    const userData = response.data;
 
-    console.log("user",  response.data);
-    
+    console.log("user", response.data);
 
     // Store the data in cookies
-    setUserInfoInCookies(user, sessionToken);
+    setUserInfoInCookies(userData, sessionToken);
 
     return response.data;
-  } catch (error: unknown) {
+  } catch (error) {
     if (axios.isAxiosError(error)) {
       console.error("Échec de la connexion :", error.response ? error.response.data : error.message);
     } else {
@@ -72,19 +74,19 @@ export default function Signin() {
     try {
       await loginUser(email, password);
       setIsLoggedIn(true); // Set the logged-in state to true
-
     } catch (err) {
       setError("Identifiants invalides ou erreur lors de la connexion");
     }
   };
 
   // Use useEffect to perform the redirection after login
+  // Use useEffect to refresh the page after login
   useEffect(() => {
-    if (typeof window !== "undefined" && isLoggedIn) {
-      // After login, redirect to the home page
-      router.push("/");
+    if (isLoggedIn) {
+      // After login, reload the current page to update the layout
+      window.location.reload(); // Reloads the page to reflect changes
     }
-  }, [isLoggedIn, router]); // Only run the effect when `isLoggedIn` changes
+  }, [isLoggedIn]); // Only run the effect when `isLoggedIn` changes
 
   // Utiliser useEffect pour mettre à jour la classe du corps pour le mode sombre
   useEffect(() => {
@@ -94,6 +96,11 @@ export default function Signin() {
       document.body.classList.remove("dark");
     }
   }, [darkMode]);
+
+  // Conditional render based on `isLoggedIn`
+  if (isLoggedIn) {
+    return <AuthenticatedLayout />; // This will render the AuthenticatedLayout after login
+  }
 
   return (
     <>

@@ -1,10 +1,41 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import ClickOutside from "@/components/ClickOutside";
 
 const DropdownUser = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
+
+  const [username, setUsername] = useState<string | null>(null);
+  const [email, setEmail] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Function to get a cookie by name
+    const getCookie = (name: string): string | null => {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) return parts.pop()?.split(';').shift() || null;
+      return null;
+    };
+
+    // Get the `user-info` cookie value
+    const userInfoCookie = getCookie('user-info');
+    const AuthTokenCookie = getCookie('AUTH-ANAS');
+
+    // Parse it as JSON to access `username`
+    if (userInfoCookie) {
+      try {
+        const userInfo = JSON.parse(userInfoCookie);
+        setUsername(userInfo.username);
+        setEmail(userInfo.email);
+      } catch (error) {
+        console.error("Failed to parse user-info cookie:", error);
+      }
+    } else {
+      console.log("user-info cookie not found");
+    }
+  }, []);
+
 
   return (
     <ClickOutside onClick={() => setDropdownOpen(false)} className="relative">
@@ -28,7 +59,7 @@ const DropdownUser = () => {
         </span>
 
         <span className="flex items-center gap-2 font-medium text-dark dark:text-dark-6">
-          <span className="hidden lg:block">Jhon Smith</span>
+          <span className="hidden lg:block"> {username}</span>
 
           <svg
             className={`fill-current duration-200 ease-in ${dropdownOpen && "rotate-180"}`}
@@ -72,10 +103,10 @@ const DropdownUser = () => {
 
             <span className="block">
               <span className="block font-medium text-dark dark:text-white">
-                Jhon Smith
+                {username}
               </span>
               <span className="block font-medium text-dark-5 dark:text-dark-6">
-                jonson@nextadmin.com
+                {email}
               </span>
             </span>
           </div>

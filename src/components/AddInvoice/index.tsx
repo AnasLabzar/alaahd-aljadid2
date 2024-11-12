@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { SelectChangeEvent } from '@mui/material';
 import { ChangeEvent } from 'react';
-
+import Image from "next/image";
 import CustomerSelect from '../CustomerSelect';
 import Link from 'next/link'; // Import Link from next/link
 import { FormControl, TextField, InputLabel, Select, MenuItem } from '@mui/material'; // Import FormControl and other components here
@@ -278,15 +278,15 @@ const AddInvoice = () => {
         const taxAmount = (tax / 100) * subtotal;
         const promotionAmount = (promotion / 100) * subtotal;
         const total = (subtotal + taxAmount - promotionAmount) + transportPrice;
-      
+
         return {
-          subtotal: subtotal.toFixed(2),
-          taxAmount: taxAmount.toFixed(2),
-          promotionAmount: promotionAmount.toFixed(2),
-          total: total.toFixed(2),
-          transportPrice: transportPrice.toFixed(2),
+            subtotal: subtotal.toFixed(2),
+            taxAmount: taxAmount.toFixed(2),
+            promotionAmount: promotionAmount.toFixed(2),
+            total: total.toFixed(2),
+            transportPrice: transportPrice.toFixed(2),
         };
-      };
+    };
 
     const totals = calculateTotal(items); // Get all totals (subtotal, tax, promotion, final total)
 
@@ -392,7 +392,22 @@ const AddInvoice = () => {
                 <div className="flex justify-between flex-wrap px-4">
                     <div className="mb-6 lg:w-1/2 w-full">
                         <div className="flex items-center text-black dark:text-white shrink-0">
-                            <img src="/images/logo/logo.png" alt="img" className="w-20" />
+                            <Image
+                                width={86}
+                                height={86}
+                                src={"/images/logo/logo-horizontal.png"}
+                                alt="Logo"
+                                priority
+                                className="dark:hidden"
+                            />
+                            <Image
+                                width={86}
+                                height={86}
+                                src={"/images/logo/logo-horizontal-light.png"}
+                                alt="Logo"
+                                priority
+                                className="hidden dark:block"
+                            />
                         </div>
                         <div className="space-y-1 mt-6 text-gray-500 dark:text-gray-400">
                             <div>El Gouassem, Route de l'ourika, Marrakech-safi</div>
@@ -464,13 +479,13 @@ const AddInvoice = () => {
                     <div className="table-responsive overflow-auto">
                         <table className="w-full border-collapse">
                             <thead>
-                                <tr className="bg-gray-200">
-                                    <th className="p-2 text-left">ID</th>
-                                    <th className="p-2 text-left">Order</th>
-                                    <th className="p-2 text-left">Prix</th>
-                                    <th className="p-2 text-left">Quantité</th>
-                                    <th className="p-2 text-left">Totale</th>
-                                    <th className="p-2"></th>
+                                <tr className="bg-gray-200 dark:bg-gray-500">
+                                    <th className="p-2 text-left dark:text-white">ID</th>
+                                    <th className="p-2 text-left dark:text-white">Order</th>
+                                    <th className="p-2 text-left dark:text-white">Prix</th>
+                                    <th className="p-2 text-left dark:text-white">Quantité</th>
+                                    <th className="p-2 text-left dark:text-white">Totale</th>
+                                    <th className="p-2 dark:text-white"></th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -480,15 +495,16 @@ const AddInvoice = () => {
                                         <td className="p-2">
                                             <FormControl fullWidth style={{ display: 'flex', flexDirection: 'row', gap: '10px' }}>
                                                 <TextField
-                                                    variant="outlined"
                                                     placeholder="Rechercher produit"
                                                     value={item.searchTerm}
                                                     onChange={handleSearchChange(item._id)}
                                                     style={{ display: 'flex', alignSelf: 'center' }}
+                                                    className='dark:text-white'
                                                 />
 
                                                 <Select
                                                     value={item.productId}
+                                                    className='dark:text-white'
                                                     onChange={(event) => handleProductChange(event, item._id)}
                                                     style={{ display: 'flex', alignSelf: 'center' }}
                                                 >
@@ -511,7 +527,7 @@ const AddInvoice = () => {
                                                                             marginRight: '5px'
                                                                         }} />
                                                                         {product.title}
-                                                                        <span style={{ marginLeft: '10px', color: '#666' }}>
+                                                                        <span className='dark:text-white' style={{ marginLeft: '10px', color: '#666' }}>
                                                                             {productColors.map(color => color.colorName).join(', ')}
                                                                         </span>
                                                                     </div>
@@ -528,7 +544,7 @@ const AddInvoice = () => {
                                                 type="number"
                                                 value={item.price}
                                                 onChange={(e) => changeQuantityPrice('price', Number(e.target.value), item._id)}
-                                                className="w-auto"
+                                                className="w-auto dark:text-white text-gray-5"
                                             />
                                         </td>
                                         <td className="p-2">
@@ -536,11 +552,11 @@ const AddInvoice = () => {
                                                 type="number"
                                                 value={item.quantity}
                                                 onChange={(e) => changeQuantityPrice('quantity', Number(e.target.value), item._id)}
-                                                className="w-auto"
+                                                className="w-auto dark:text-white"
                                             />
                                         </td>
-                                        <td className="p-2">{(item.price * item.quantity).toFixed(2)}</td>
-                                        <td className="p-2">
+                                        <td className="p-2 dark:text-white">{(item.price * item.quantity).toFixed(2)}</td>
+                                        <td className="p-2 dark:text-white">
                                             <button onClick={() => removeItem(item._id)} className="fill-red-600">
                                                 <svg width="12" id="Layer_1" enable-background="new 0 0 25.9 32" viewBox="0 0 25.9 32" xmlns="http://www.w3.org/2000/svg"><path d="m8 10h2v16h-2z" /><path d="m12 10h2v16h-2z" /><path d="m16 10h2v16h-2z" /><path d="m18 4v-4h-10v4h-8v2h2l1 23c0 1.7 1.3 3 3 3h14c1.6 0 3-1.3 3-3l1-23h1.9v-2zm-8-2h6v2h-6zm11 27c0 .6-.4 1-1 1h-14c-.6 0-1-.5-1-1l-1-23h18z" /></svg>
                                             </button>

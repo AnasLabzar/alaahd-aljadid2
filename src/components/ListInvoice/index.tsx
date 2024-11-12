@@ -78,21 +78,35 @@ const ListInvoice = () => {
                 );
 
                 // Fetch users with roles 'custom' or 'fourn'
-                const userResponse = await axios.get("https://backendalaahd.onrender.com/api/users?role=custom,fourn");
-                const usersData = userResponse.data;
-                const userMap = usersData.reduce((acc: { [key: string]: User }, user: User) => {
+                const customResponse = await axios.get("https://backendalaahd.onrender.com/api/users/role/custom");
+                const fournResponse = await axios.get("https://backendalaahd.onrender.com/api/users/role/fourn");
+
+                // Combine the 'custom' and 'fourn' users
+                const customUsers = customResponse.data;
+                const fournUsers = fournResponse.data;
+
+                // Merge both user arrays into one
+                const allUsers = [...customUsers, ...fournUsers];
+
+                // Create a map of users by their _id
+                const userMap = allUsers.reduce((acc: { [key: string]: User }, user: User) => {
                     acc[user._id] = user;
                     return acc;
                 }, {});
 
+                // Fetch the order data (this assumes you have orderPromises already)
                 const orderResponses = await Promise.all(orderPromises);
+
+                // Map the order data by _id
                 const orderData = orderResponses.reduce((acc: { [key: string]: Order }, res) => {
                     acc[res.data._id] = res.data;
                     return acc;
                 }, {});
 
+                // Update the state with orders and users
                 setOrders(orderData);
                 setUsers(userMap);
+
             } catch (error) {
                 console.error("Error fetching invoices or users:", error);
             } finally {

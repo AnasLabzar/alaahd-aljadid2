@@ -1,6 +1,5 @@
 "use client"
 
-// components/AuthenticatedLayout.tsx
 import React, { useEffect, useState } from "react";
 import { isAuthenticated } from "@/components/utils/auth";
 import DefaultLayout from "@/components/Layouts/DefaultLaout";
@@ -16,19 +15,20 @@ const AuthenticatedLayout: React.FC = () => {
     setIsAuthRoute(authStatus);
   }, []);
 
-  if (!isAuthRoute) {
-    return (
-      <AuthLayout>
-        <SignIn />
-      </AuthLayout>
-    );
-  } else {
-    return (
-      <DefaultLayout>
-        <ECommerce />
-      </DefaultLayout>
-    );
-  }
+  // If authenticated, render ECommerce, otherwise show SignIn
+  return (
+    <>
+      {isAuthRoute ? (
+        <DefaultLayout>
+          <ECommerce />
+        </DefaultLayout>
+      ) : (
+        <AuthLayout>
+          <SignIn />
+        </AuthLayout>
+      )}
+    </>
+  );
 };
 
 export default AuthenticatedLayout;
