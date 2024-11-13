@@ -181,15 +181,6 @@ const InvoiceTemplate: React.FC<InvoiceTemplateProps> = ({ invoiceId }) => {
                         src={"/images/logo/logo-horizontal.png"}
                         alt="Logo"
                         priority
-                        className="dark:hidden"
-                    />
-                    <Image
-                        width={86}
-                        height={86}
-                        src={"/images/logo/logo-horizontal-light.png"}
-                        alt="Logo"
-                        priority
-                        className="hidden dark:block"
                     />
                 </Grid>
                 <Grid item xs={6} style={{ display: 'flex', alignItems: 'flex-end', flexDirection: 'column' }}>

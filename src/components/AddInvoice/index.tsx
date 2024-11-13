@@ -77,6 +77,8 @@ const AddInvoice = () => {
     const [transportPrice, setTransportPrice] = useState<number>(0); // State for transport price
     const [ordredDate, setOrdredDate] = useState<string>('');
     const [dueDate, setDueDate] = useState<string>('');
+    const [adminId, setAdminId] = useState<string>('');
+    const [username, setUsername] = useState<string>('');
     const [status, setStatus] = useState<string>('pending');
 
 
@@ -317,6 +319,32 @@ const AddInvoice = () => {
 
     console.log(calculateTotalProfit);
 
+    useEffect(() => {
+        // Function to get a cookie by name
+        const getCookie = (name: string): string | null => {
+          const value = `; ${document.cookie}`;
+          const parts = value.split(`; ${name}=`);
+          if (parts.length === 2) return parts.pop()?.split(';').shift() || null;
+          return null;
+        };
+    
+        // Get the `user-info` cookie value
+        const userInfoCookie = getCookie('user-info');
+    
+        // Parse it as JSON to access `username`
+        if (userInfoCookie) {
+          try {
+            const userInfo = JSON.parse(userInfoCookie);
+            setAdminId(userInfo._id);
+            setUsername(userInfo.username);
+          } catch (error) {
+            console.error("Failed to parse user-info cookie:", error);
+          }
+        } else {
+          console.log("user-info cookie not found");
+        }
+      }, []);
+
 
 
     const insertOrders = async (items: InvoiceItem[]): Promise<string[]> => {
@@ -356,7 +384,7 @@ const AddInvoice = () => {
                 invoiceRef: generateInvoiceRef(),  // Function to generate your invoice ref
                 orderId: orderIds,  // Insert orderId array
                 customerId: customerId,  // Assuming customerId is already set
-                adminId: 'adminId_here',  // Replace with the correct admin ID
+                adminId: adminId,  // Replace with the correct admin ID
                 productId: items.map(item => item.productId),  // Insert productId array
                 total: parseFloat(totals.total),  // Ensure the total is a number
                 type: typeFacturation,  // Example type
@@ -414,9 +442,9 @@ const AddInvoice = () => {
                             <div>alaahd-aljadid@gmail.com</div>
                             <div>+212 689-063963</div>
                         </div>
-                        <div className="space-y-1 mt-4 text-black font-bold">
+                        <div className="space-y-1 mt-4 text-black dark:text-gray-400 font-bold">
                             <div>Agent de facturation:</div>
-                            <div className='font-normal'>M. <span>Mehdi El kouadni</span></div>
+                            <div className='font-medium text-gray-400 dark:text-gray-500'>M. <span>{username}</span></div>
                         </div>
                     </div>
                     <div className="lg:w-1/2 w-full lg:max-w-fit">
