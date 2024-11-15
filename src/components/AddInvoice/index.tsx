@@ -81,13 +81,6 @@ const AddInvoice = () => {
     const [username, setUsername] = useState<string>('');
     const [status, setStatus] = useState<string>('pending');
 
-    const [isAuthRoute, setIsAuthRoute] = useState(false);
-
-    useEffect(() => {
-      const authStatus = isAuthenticated();
-      setIsAuthRoute(authStatus);
-    }, []);
-
 
     useEffect(() => {
         const fetchProducts = async () => {
