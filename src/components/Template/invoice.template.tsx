@@ -33,7 +33,9 @@ interface InvoiceData {
     invoiceRef: string;
     orderId: string[];
     customerId: string;
+    adminId: string;
     productId: string[];
+    fetchedAt: string;
 }
 
 interface OrderData {
@@ -46,6 +48,12 @@ interface OrderData {
 }
 
 interface CustomerData {
+    username: string;
+    phone: string;
+    fetchedAt: string;
+}
+
+interface AdminData {
     username: string;
     phone: string;
     fetchedAt: string;
@@ -72,6 +80,7 @@ const InvoiceTemplate: React.FC<InvoiceTemplateProps> = ({ invoiceId }) => {
     const [invoiceData, setInvoiceData] = useState<InvoiceData | null>(null);
     const [orderData, setOrderData] = useState<OrderData[]>([]);
     const [customerData, setCustomerData] = useState<CustomerData | null>(null);
+    const [adminData, setAdminData] = useState<AdminData | null>(null);
     const [productData, setProductData] = useState<ProductData[]>([]);
     const [colorsData, setColorsData] = useState<ColorData[]>([]);
     const [subtotal, setSubtotal] = useState(0);
@@ -92,15 +101,27 @@ const InvoiceTemplate: React.FC<InvoiceTemplateProps> = ({ invoiceId }) => {
                 const customerResponse = await axios.get<CustomerData>(`https://backendalaahd.onrender.com/api/users/${invoiceData.customerId}`);
                 const customerData = customerResponse.data;
 
+                const adminResponse = await axios.get<AdminData>(`https://backendalaahd.onrender.com/api/users/${invoiceData.adminId}`);
+                const adminData = adminResponse.data;
+
                 const productResponses = await Promise.all(
                     invoiceData.productId.map(productId => axios.get<ProductData>(`https://backendalaahd.onrender.com/api/products/${productId}`))
                 );
                 const productData = productResponses.map(response => response.data);
 
                 const colorResponses = await Promise.all(
-                    productData.map(product => axios.get<ColorData>(`https://backendalaahd.onrender.com/api/colors/${product.colorsId}`))
+                    productData.map(product =>
+                        axios
+                            .get<ColorData>(`https://backendalaahd.onrender.com/api/colors/${product.colorsId}`)
+                            .then(response => response.data) // On success, return the color data
+                            .catch(error => {
+                                console.error(`Failed to fetch color for ID ${product.colorsId}:`, error);
+                                return null; // Return null for failed requests
+                            })
+                    )
                 );
-                const colorsData = colorResponses.map(response => response.data);
+
+                const colorsData = colorResponses.filter(color => color !== null); // Remove null values                
 
                 const totalAmounts = orderData.map(order => parseFloat(order.total));
                 const subtotal = totalAmounts.reduce((acc, curr) => acc + curr, 0);
@@ -110,6 +131,7 @@ const InvoiceTemplate: React.FC<InvoiceTemplateProps> = ({ invoiceId }) => {
                 setInvoiceData(invoiceData);
                 setOrderData(orderData);
                 setCustomerData(customerData);
+                setAdminData(adminData);
                 setProductData(productData);
                 setColorsData(colorsData);
                 setSubtotal(subtotal);
@@ -125,7 +147,7 @@ const InvoiceTemplate: React.FC<InvoiceTemplateProps> = ({ invoiceId }) => {
 
     const grandTotal = subtotal - (subtotal * (discount / 100));
 
-    if (!invoiceData || !orderData || !customerData || !productData || !colorsData) {
+    if (!invoiceData || !orderData || !customerData || !adminData || !productData || !colorsData) {
         return <div>Loading...</div>;
     }
 
@@ -185,18 +207,18 @@ const InvoiceTemplate: React.FC<InvoiceTemplateProps> = ({ invoiceId }) => {
                 </Grid>
                 <Grid item xs={6} style={{ display: 'flex', alignItems: 'flex-end', flexDirection: 'column' }}>
                     <Stack style={{ flexDirection: 'row', gap: '6px' }}>
-                        <Typography className="text-gray-700 dark:text-gray-500" gutterBottom>
+                        <Typography className="text-gray-700 text-[16px] font-bold dark:text-gray-500" gutterBottom>
                             Date
                         </Typography>
-                        <Typography className="text-gray-700 dark:text-gray-600" variant="body1" gutterBottom>
+                        <Typography className="text-gray-700 text-[16px] dark:text-gray-600" variant="body1" gutterBottom>
                             {formatDate(orderData[0].ordred)}
                         </Typography>
                     </Stack>
                     <Stack style={{ flexDirection: 'row', gap: '6px' }}>
-                        <Typography className="text-gray-700 dark:text-gray-500" gutterBottom>
+                        <Typography className="text-gray-700 text-[16px] font-bold dark:text-gray-500" gutterBottom>
                             Due Date
                         </Typography>
-                        <Typography className="font-bold text-gray-700 dark:text-gray-600" variant="body1" gutterBottom>
+                        <Typography className="font-bold text-gray-700 text-[16px] dark:text-gray-600" variant="body1" gutterBottom>
                             {formatDate(orderData[0].dueDate)}
                         </Typography>
                     </Stack>
@@ -204,28 +226,69 @@ const InvoiceTemplate: React.FC<InvoiceTemplateProps> = ({ invoiceId }) => {
             </Grid>
             <Table>
                 <TableBody>
-                    <Grid container xs={12}>
-                        <Grid item xs={6} md={12}>
+                    <Grid container xs={12} spacing={2} style={{ marginTop: '10px' }}>
+                        <Grid item xs={6}>
                             <TableRow style={{ display: 'flex', justifyContent: 'start', alignItems: 'center', gap: '10px' }}>
+                                <Typography className="text-gray-700 dark:text-gray-500" style={{ fontSize: '12px' }}>
+                                    El Gouassem, Route d'ourika
+                                </Typography>
+                            </TableRow>
+                            <TableRow style={{ display: 'flex', justifyContent: 'start', alignItems: 'center', gap: '10px' }}>
+                                <Typography className="text-gray-700 dark:text-gray-500" style={{ fontSize: '12px' }}>
+                                    Marrakech, 40160
+                                </Typography>
+                            </TableRow>
+                            <TableRow style={{ display: 'flex', justifyContent: 'start', alignItems: 'center', gap: '10px' }}>
+                                <Typography className="text-gray-700 dark:text-gray-500" style={{ fontSize: '12px' }}>
+                                    +212 689-063963
+                                </Typography>
+                            </TableRow>
+                            <TableRow style={{ display: 'flex', justifyContent: 'start', alignItems: 'center', gap: '10px', margin: '1em 0' }}>
                                 <Typography className="text-gray-700 dark:text-gray-500" style={{ padding: '8px 0px', fontSize: '12px' }}>
                                     #{invoiceData.invoiceRef}
                                 </Typography>
                                 <StatusChip status={statusInvoice} />
                             </TableRow>
                         </Grid>
+                        <Grid item xs={6} style={{ paddingLeft: '1em' }}>
+                            <Typography className="text-gray-900 dark:text-gray-700" style={{ fontSize: '15px', margin: '0', fontWeight: '700', opacity: '.7', display: 'flex', justifyContent: 'end' }} gutterBottom>
+                                Client info
+                            </Typography>
+                            <Typography className="text-gray-700 dark:text-gray-600" style={{ fontSize: '13px', margin: '0', fontWeight: '500', opacity: '.7', display: 'flex', justifyContent: 'end', marginTop: '2px' }} variant="body1" gutterBottom>
+                                {customerData.username}
+                            </Typography>
+                            <Typography className="text-gray-700 dark:text-gray-600" style={{ fontSize: '13px', margin: '0', fontWeight: '500', opacity: '.7', display: 'flex', justifyContent: 'end' }} variant="body1" gutterBottom>
+                                {customerData.phone}
+                            </Typography>
+                        </Grid>
                     </Grid>
                 </TableBody>
             </Table>
+
             <Grid container spacing={2}>
-                <Grid item xs={6}>
-                </Grid>
                 <Grid item xs={6} style={{ paddingLeft: '1em' }}>
-                    <Typography className="text-gray-700 dark:text-gray-500" style={{ fontSize: '15px', margin: '0', fontWeight: '700', opacity: '.7', display: 'flex', justifyContent: 'end' }} gutterBottom>
-                        Customer info
+                    <Typography className="text-gray-900 dark:text-gray-700" style={{ fontSize: '15px', margin: '0', fontWeight: '700', opacity: '.7', display: 'flex', justifyContent: 'start' }} gutterBottom>
+                        Crée par monsieur:
                     </Typography>
-                    <Typography className="text-gray-700 dark:text-gray-600" style={{ fontSize: '13px', margin: '0', fontWeight: '500', opacity: '.7', display: 'flex', justifyContent: 'end', marginTop: '8px' }} variant="body1" gutterBottom>
-                        {customerData.username}
+                    <Typography className="text-gray-700 dark:text-gray-600" style={{ fontSize: '13px', margin: '0', fontWeight: '500', opacity: '.7', display: 'flex', justifyContent: 'start', marginTop: '2px' }} variant="body1" gutterBottom>
+                        {adminData.username}
                     </Typography>
+                    <Typography
+                        className="text-gray-700 dark:text-gray-600"
+                        style={{ fontSize: '13px', margin: '0', fontWeight: '500', opacity: '.7', display: 'flex', justifyContent: 'start', marginTop: '2px' }}
+                        variant="body1"
+                        gutterBottom
+                    >
+                        a {new Date(invoiceData.fetchedAt).toLocaleTimeString('fr-FR', {
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        })} le {new Date(invoiceData.fetchedAt).toLocaleDateString('fr-FR', {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: '2-digit'
+                        })}
+                    </Typography>
+
                 </Grid>
             </Grid>
 
@@ -283,12 +346,12 @@ const InvoiceTemplate: React.FC<InvoiceTemplateProps> = ({ invoiceId }) => {
                             Grand Total:
                         </Typography>
                         <Typography variant="body1" style={{ fontWeight: 'bold' }} gutterBottom>
-                            {grandTotal.toFixed(2)}
+                            {grandTotal.toFixed(2)} DH
                         </Typography>
                     </Grid>
                 </Stack>
             </Grid>
-        </Grid>
+        </Grid >
     );
 
 };

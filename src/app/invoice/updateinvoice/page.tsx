@@ -4,9 +4,9 @@ import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import AddInvoice from "@/components/AddInvoice";
 
 export const metadata: Metadata = {
-  title: "Next.js Calender Page | NextAdmin - Next.js Dashboard Kit",
+  title: "Alaahd Aljadid Aluminium | Backoffice",
   description:
-    "This is Next.js Calender page for NextAdmin  Tailwind CSS Admin Dashboard Kit",
+    "This is Alaahd Aljadid backoffice page for Administration Aluminium",
   // other metadata
 };
 

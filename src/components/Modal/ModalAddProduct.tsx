@@ -6,50 +6,44 @@ import MaskedInput from 'react-text-mask';
 
 
 
-// Define props interface
 interface AddProductProps {
     open: boolean;
     handleClose: () => void;
 }
 
-// Define the ColorType interface
 interface ColorType {
     _id: string;
     refColor: string;
-    name: string;  // This is the property we're using in the filtering
+    name: string;
     stock_color: string;
     fetchedAt: string;
     __v: number;
 }
 
-// Define Color interface
 interface Color {
     value: string;
-    label: JSX.Element; // Adjust based on your actual data structure
-    refColor: string;   // or whatever type refColor should be
+    label: JSX.Element;
+    refColor: string;
 }
-
 
 interface CategoryResponse {
     _id: string;
     title: string;
 }
 
-// Define Category interface
 interface Category {
     value: string;
-    label: string;      // Adjust based on your actual data structure
+    label: string;
 }
 
-// Define Selected Color interface
 interface SelectedColor {
-    value: Color | null; // This cannot accept a string
-    label: string; // This accepts a string
-    salePrice: string; // This accepts a string
-    purchasePrice: string; // This accepts a string
-    quantity: string; // This accepts a string
-    sku: string; // This accepts a string
-    category: Category | null; // This cannot accept a string
+    value: Color | null;
+    label: string;
+    salePrice: string;
+    purchasePrice: string;
+    quantity: string;
+    sku: string;
+    category: Category | null;
 }
 
 
@@ -62,15 +56,12 @@ const AddProduct: React.FC<AddProductProps> = ({ open, handleClose }) => {
     ]);
     const [categoryOptions, setCategoryOptions] = useState<Category[]>([]);
 
-    // Fetch unique colors
     const fetchUniqueColors = async () => {
         try {
             const response = await axios.get('https://backendalaahd.onrender.com/api/colors');
             const colors: ColorType[] = response.data;
     
             const uniqueColorsMap = new Map<string, string>();
-    
-            // Loop through the colors and filter duplicates by name, excluding 'NONE'
             colors.forEach((color) => {
                 if (color.name !== 'NONE' && !uniqueColorsMap.has(color.name)) {
                     uniqueColorsMap.set(color.name, color.refColor);
@@ -101,10 +92,7 @@ const AddProduct: React.FC<AddProductProps> = ({ open, handleClose }) => {
             console.error('Error fetching colors:', error);
         }
     };
-
-
-
-    // Fetch categories
+    
     const fetchCategories = async () => {
         try {
             const response = await axios.get('https://backendalaahd.onrender.com/api/categories');
@@ -117,78 +105,61 @@ const AddProduct: React.FC<AddProductProps> = ({ open, handleClose }) => {
             console.error('Error fetching categories:', error);
         }
     };
+    
+    
 
     useEffect(() => {
         if (open) {
             fetchUniqueColors();
             fetchCategories();
         }
-    }, [open]);
+    }, [open]);    
 
     const generateSKU = (colorName: string) => {
-        const randomNumber = Math.floor(1000 + Math.random() * 9000); // Generates a random 4-digit number
-        return `${colorName?.substring(0, 2).toUpperCase()}${randomNumber}`; // Example: FB2031
-    };
+        const randomNumber = Math.floor(1000 + Math.random() * 9000);
+        return `${colorName?.substring(0, 2).toUpperCase()}${randomNumber}`;
+    };    
 
     const addColorRow = () => {
         if (selectedColors.length < 10) {
             setSelectedColors([...selectedColors, { value: null, label: '', salePrice: '', purchasePrice: '', quantity: '', sku: '', category: null }]);
         }
     };
+    
+    const handleDeleteColorRow = (index: number) => {
+        const newSelectedColors = selectedColors.filter((_, i) => i !== index);
+        setSelectedColors(newSelectedColors);
+    };
+    
 
     const handleColorChange = (selectedOption: Color | null, index: number) => {
         const newSelectedColors = [...selectedColors];
-        newSelectedColors[index].value = selectedOption; // Store the selected option object
-        const colorName = selectedOption ? selectedOption.value : ''; // Get the color name safely
-        newSelectedColors[index].sku = generateSKU(colorName); // Generate SKU
+        newSelectedColors[index].value = selectedOption;
+        const colorName = selectedOption ? selectedOption.value : '';
+        newSelectedColors[index].sku = generateSKU(colorName);
         setSelectedColors(newSelectedColors);
-    };
+    };    
 
 
     const handleInputChange = (index: number, field: keyof SelectedColor, value: string | Color | Category | null) => {
         const newSelectedColors = [...selectedColors];
-
-        // Handle specific field types
-        switch (field) {
-            case 'value':
-                // Ensure that value is of type Color, or set it to null
-                newSelectedColors[index][field] = value as Color; // Assuming value should be of type Color
-                break;
-            case 'category':
-                // Ensure that value is of type Category or null
-                newSelectedColors[index][field] = value as Category | null; // Assuming value should be of type Category
-                break;
-            case 'salePrice':
-            case 'purchasePrice':
-            case 'quantity':
-            case 'sku':
-                // For fields that are strings, we can assign the value directly
-                newSelectedColors[index][field] = value as string; // Treating as string since these are string fields
-                break;
-            default:
-                throw new Error(`Unhandled field type: ${field}`);
-        }
-
+        newSelectedColors[index][field] = value as any;
         setSelectedColors(newSelectedColors);
     };
+    
 
 
     const handleCategoryChange = (selectedOption: Category | null, index: number) => {
         const newSelectedColors = [...selectedColors];
         newSelectedColors[index].category = selectedOption;
         setSelectedColors(newSelectedColors);
-    };
-
-    const handleDeleteColorRow = (index: number) => {
-        const newSelectedColors = selectedColors.filter((_, i) => i !== index);
-        setSelectedColors(newSelectedColors);
-    };
+    };    
 
     const handleAddProduct = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         console.log({ productName, selectedColors });
-        handleClose(); // Call handleClose to close the modal after adding the product
-    };
+        handleClose(); // Close the modal
+    };    
 
     const calculateMargin = (salePrice: string, purchasePrice: string): string => {
         const sale = parseFloat(salePrice.replace(' DH', '').replace(',', '.')) || 0;

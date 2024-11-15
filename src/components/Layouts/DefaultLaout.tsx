@@ -1,7 +1,10 @@
 "use client";
-import React, { useState, ReactNode } from "react";
+import React, { useState, ReactNode, useEffect } from "react";
 import Sidebar from "@/components/Sidebar";
 import Header from "@/components/Header";
+import AuthLayout from "./AuthLaout";
+import SignIn from "@/app/auth/signin/page";
+import { isAuthenticated } from "../utils/auth";
 
 export default function DefaultLayout({
   children,
@@ -9,15 +12,19 @@ export default function DefaultLayout({
   children: React.ReactNode;
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isAuthRoute, setIsAuthRoute] = useState(false);
+
+  useEffect(() => {
+    const authStatus = isAuthenticated();
+    setIsAuthRoute(authStatus);
+  }, []);
+
   return (
     <>
-      {/* <!-- ===== Page Wrapper Star ===== --> */}
-      <div className="flex h-screen overflow-hidden">
-        {/* <!-- ===== Sidebar Star ===== --> */}
-        <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
-        {/* <!-- ===== Sidebar End ===== --> */}
+  {isAuthRoute ? (
 
-        {/* <!-- ===== Content Area Star ===== --> */}
+      <div className="flex h-screen overflow-hidden">
+        <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
         <div className="relative flex flex-1 flex-col overflow-y-auto overflow-x-hidden">
           {/* <!-- ===== Header Star ===== --> */}
           <Header sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
@@ -31,9 +38,12 @@ export default function DefaultLayout({
           </main>
           {/* <!-- ===== Main Content End ===== --> */}
         </div>
-        {/* <!-- ===== Content Area End ===== --> */}
       </div>
-      {/* <!-- ===== Page Wrapper End ===== --> */}
+    ) : (
+      <AuthLayout>
+        <SignIn />
+      </AuthLayout>
+    )}
     </>
   );
 }
