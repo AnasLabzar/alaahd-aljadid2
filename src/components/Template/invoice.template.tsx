@@ -113,15 +113,16 @@ const InvoiceTemplate: React.FC<InvoiceTemplateProps> = ({ invoiceId }) => {
                     productData.map(product =>
                         axios
                             .get<ColorData>(`https://backendalaahd.onrender.com/api/colors/${product.colorsId}`)
-                            .then(response => response.data) // On success, return the color data
+                            .then(response => response.data)
                             .catch(error => {
                                 console.error(`Failed to fetch color for ID ${product.colorsId}:`, error);
                                 return null; // Return null for failed requests
                             })
                     )
                 );
-
-                const colorsData = colorResponses.filter(color => color !== null); // Remove null values                
+                
+                // Filter null values with type assertion
+                const colorsData = colorResponses.filter((color): color is ColorData => color !== null);
 
                 const totalAmounts = orderData.map(order => parseFloat(order.total));
                 const subtotal = totalAmounts.reduce((acc, curr) => acc + curr, 0);
