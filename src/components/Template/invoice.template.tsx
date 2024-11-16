@@ -215,10 +215,10 @@ const InvoiceTemplate: React.FC<InvoiceTemplateProps> = ({ invoiceId }) => {
                         </Typography>
                     </Stack>
                     <Stack style={{ flexDirection: 'row', gap: '6px' }}>
-                        <Typography className="text-gray-700 text-[16px] font-bold dark:text-gray-500" gutterBottom>
+                        <Typography className="text-gray-700 dark:text-gray-500" gutterBottom>
                             Due Date
                         </Typography>
-                        <Typography className="font-bold text-gray-700 text-[16px] dark:text-gray-600" variant="body1" gutterBottom>
+                        <Typography className="font-bold text-gray-700 dark:text-gray-600" variant="body1" gutterBottom>
                             {formatDate(orderData[0].dueDate)}
                         </Typography>
                     </Stack>
