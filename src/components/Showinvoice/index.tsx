@@ -43,33 +43,40 @@ const DetailInvoice: React.FC<{ id: string }> = ({ id }) => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const fetchInvoiceData = async () => {
-            if (!id) return; // Don't fetch if id is not set
+    const fetchInvoiceData = async () => {
+        if (!id) return; // Don't fetch if id is not set
 
-            try {
-                setLoading(true);
-                const invoiceResponse = await axios.get(`https://backendalaahd.onrender.com/api/invoices/${id}`);
-                setInvoice(invoiceResponse.data);
+        try {
+            setLoading(true);
+            const invoiceResponse = await axios.get(`https://backendalaahd.onrender.com/api/invoices/${id}`);
+            setInvoice(invoiceResponse.data);
 
-                const orderPromises = invoiceResponse.data.orderIds.map((orderId: string) =>
-                    axios.get(`https://backendalaahd.onrender.com/api/orders/${orderId}`)
-                );
-                const orderResponses = await Promise.all(orderPromises);
-                const orderItems = orderResponses.map(res => res.data.products).flat();
+            const orderPromises = invoiceResponse.data.orderIds.map((orderId: string) =>
+                axios.get(`https://backendalaahd.onrender.com/api/orders/${orderId}`)
+            );
+            const orderResponses = await Promise.all(orderPromises);
+            const orderItems = orderResponses.map(res => res.data.products).flat();
 
-                setItems(orderItems);
+            setItems(orderItems);
 
-                const userResponse = await axios.get(`https://backendalaahd.onrender.com/api/users/${invoiceResponse.data.customerId}`);
-                setUser(userResponse.data);
-            } catch (error) {
-                console.error("Error fetching invoice data:", error);
-            } finally {
-                setLoading(false);
+            const userResponse = await axios.get(`https://backendalaahd.onrender.com/api/users/${invoiceResponse.data.customerId}`);
+            const userData = userResponse.data;
+
+            // If adminId is not available, set it to 'N/A'
+            if (!userData.adminId) {
+                userData.adminId = 'N/A';
             }
-        };
 
-        fetchInvoiceData();
-    }, [id]);
+            setUser(userData);
+        } catch (error) {
+            console.error("Error fetching invoice data:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    fetchInvoiceData();
+}, [id]);
 
     if (loading) {
         return <div>Loading...</div>; // Add a loading indicator
