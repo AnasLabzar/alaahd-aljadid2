@@ -30,6 +30,7 @@ interface ColorType {
     _id: string;
     refColor: string; // The hex code for color
     colorName: string;
+    stock_color: striing;
 }
 
 interface InvoiceItem {
