@@ -30,7 +30,7 @@ interface ColorType {
     _id: string;
     refColor: string; // The hex code for color
     colorName: string;
-    stock_color: string;
+    stock_color: number;
 }
 
 interface InvoiceItem {
@@ -354,17 +354,15 @@ const AddInvoice = () => {
             // Fetch the color details for the item based on Refcolor
             const color = colors.find(color => color.refColor === item.Refcolor);
 
-            if (color) {
+            if (color && typeof color.stock_color === 'number' && typeof item.quantity === 'number') {
                 const updatedStock = typeFacturation === 'customer'
                     ? Math.max(0, color.stock_color - item.quantity) // Subtract for customer
                     : color.stock_color + item.quantity; // Add for supplier
-
+            
                 // Update the stock in the database
                 const response = await axios.put(`https://backendalaahd.onrender.com/api/colors/${color._id}`, {
                     stock_color: updatedStock,
                 });
-
-                return response.data;
             }
         });
 
