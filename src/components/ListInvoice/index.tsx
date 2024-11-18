@@ -428,9 +428,9 @@ const ListInvoice = () => {
                             ) : (
                                 paginatedInvoices.map((invoice) => {
                                     const firstOrderId = invoice.orderId[0];
+                                    const fetchedAtTime = invoice.fetchedAt;
                                     const orderStatus = firstOrderId ? orders[firstOrderId]?.status || "N/A" : "N/A";
                                     const ordredDate = firstOrderId ? orders[firstOrderId]?.ordred || "N/A" : "N/A";
-                                    const fetchedAtTime = firstOrderId ? orders[firstOrderId]?.dueDate || "N/A" : "N/A";
                                     const customerName = users[invoice.customerId]?.username || "N/A";
                                     const { backgroundColor, textColor } = getStatusStyles(orderStatus);
 
@@ -456,10 +456,10 @@ const ListInvoice = () => {
                                                 </span>
                                             </td>
                                             <td className="border-[#eee] px-4 py-4 dark:border-dark-3">
-                                                {formatFetchedAtDate(ordredDate)}
+                                                {formatFetchedAtDate(fetchedAtTime)}
                                             </td>
                                             <td className="border-[#eee] px-4 py-4 dark:border-dark-3">
-                                                {formatFetchedAtTime(dueDate)}
+                                                {formatFetchedAtTime(fetchedAtTime)}
                                             </td>
                                             <td className="border-[#eee] flex gap-2 px-4 py-4 dark:border-dark-3">
                                                 <button
