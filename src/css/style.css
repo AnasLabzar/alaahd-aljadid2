@@ -9,8 +9,9 @@
         @apply relative z-1 bg-gray-2 font-satoshi text-base font-normal text-dark-5 dark:bg-[#020D1A] dark:text-dark-6;
     }
 }
-.swal2-popup.swal2-modal.dark.swal2-show {
-    width: 40em;
+.swal2-popup.swal2-modal.dark.swal2-show,
+.swal2-popup.swal2-modal.swal2-show{
+    width: 42em;
 }
 
 @layer components {
