@@ -293,6 +293,22 @@ const AddInvoice = () => {
 
     const totals = calculateTotal(items); // Get all totals (subtotal, tax, promotion, final total)
 
+    const insertOrders = async (items: InvoiceItem[]): Promise<string[]> => {
+    try {
+        // Assuming you have an API endpoint for inserting orders
+        const response = await axios.post('https://backendalaahd.onrender.com/api/orders', {
+            items, // Sending the items to your backend
+        });
+
+        // Assuming the response returns an array of order IDs
+        return response.data.orderIds;
+    } catch (error) {
+        console.error('Error inserting orders:', error);
+        return []; // Return an empty array if there is an error
+    }
+};
+
+
     // Handle input change
     const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -404,10 +420,11 @@ const handleSubmit = async () => {
         await updateStockQuantity(items); // Update stock based on the invoice type
         alert("Facture, commandes créées, et stock mis à jour avec succès");
     } catch (error) {
-        console.error("Erreur lors de la soumission:", error);
-        alert("Une erreur est survenue lors de la soumission. Veuillez réessayer.");
+        console.error("Error during submission:", error);
+        alert("There was an error processing the invoice. Please try again.");
     }
 };
+
 
 
 
