@@ -193,32 +193,27 @@ const ListInvoice = () => {
      
      
 
-    // Filter invoices by ordred date, status, and search term
+    // Filter invoices by search term, status, and date range
     const filteredInvoices = allInvoices.filter((invoice) => {
         const customerUsername = users[invoice.customerId]?.username?.toLowerCase() || '';
         const invoiceRef = invoice.invoiceRef.toLowerCase();
-        const firstOrderId = invoice.orderId[0];
-        const orderStatus = firstOrderId ? orders[firstOrderId]?.status : "N/A";
-        const ordredDate = firstOrderId ? new Date(orders[firstOrderId]?.ordred || "") : null;
-
-        const statusMatch = selectedStatus === 'all' || orderStatus === selectedStatus;
+        const statusMatch = selectedStatus === 'all' || orders[invoice.orderId[0]]?.status === selectedStatus;
         const searchMatch = customerUsername.includes(searchTerm.toLowerCase()) || invoiceRef.includes(searchTerm.toLowerCase());
-        const dateMatch = ordredDate
-            ? (!startDate || ordredDate >= startDate) && (!endDate || ordredDate <= endDate)
+    
+        const fetchedAtDate = new Date(invoice.fetchedAt);
+        const dateMatch = fetchedAtDate
+            ? (!startDate || fetchedAtDate >= startDate) && (!endDate || fetchedAtDate <= endDate)
             : false;
-
+    
         return searchMatch && statusMatch && dateMatch;
     });
 
-    // Sort the filtered invoices by the ordred date, most recent first
+    // Sort invoices by fetchedAt (most recent first)
     const sortedInvoices = filteredInvoices.sort((a, b) => {
-        const firstOrderA = a.orderId[0] ? orders[a.orderId[0]] : null;
-        const firstOrderB = b.orderId[0] ? orders[b.orderId[0]] : null;
-
-        const dateA = firstOrderA ? new Date(firstOrderA.ordred) : new Date(0); // Default to epoch if no order
-        const dateB = firstOrderB ? new Date(firstOrderB.ordred) : new Date(0); // Default to epoch if no order
-
-        return dateB.getTime() - dateA.getTime(); // Sort descending (most recent first)
+        const dateA = new Date(a.fetchedAt);
+        const dateB = new Date(b.fetchedAt);
+    
+        return dateB.getTime() - dateA.getTime(); // Descending order
     });
 
     // Pagination
@@ -435,7 +430,7 @@ const ListInvoice = () => {
                                     const firstOrderId = invoice.orderId[0];
                                     const orderStatus = firstOrderId ? orders[firstOrderId]?.status || "N/A" : "N/A";
                                     const ordredDate = firstOrderId ? orders[firstOrderId]?.ordred || "N/A" : "N/A";
-                                    const dueDate = firstOrderId ? orders[firstOrderId]?.dueDate || "N/A" : "N/A";
+                                    const fetchedAtTime = firstOrderId ? orders[firstOrderId]?.dueDate || "N/A" : "N/A";
                                     const customerName = users[invoice.customerId]?.username || "N/A";
                                     const { backgroundColor, textColor } = getStatusStyles(orderStatus);
 
