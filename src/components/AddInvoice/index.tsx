@@ -347,69 +347,68 @@ const AddInvoice = () => {
 
 
 
-    const insertOrders = async (items: InvoiceItem[]): Promise<string[]> => {
-        try {
-            const orderIds = await Promise.all(
-                items.map(async (item) => {
-                    const orderData = {
-                        refOrder: generateOrderRef(),
-                        totalProfit: calculateTotalProfit(item.profit, item.quantity),
-                        ordred: new Date(ordredDate).toISOString(),
-                        dueDate: new Date(dueDate).toISOString(),
-                        quantity: item.quantity,
-                        total: item.price * item.quantity,
-                        discount: promotion,
-                        status,
-                        note: item.description,
-                    };
+    const updateStockQuantity = async (items: InvoiceItem[]) => {
+    try {
+        const stockUpdates = items.map(async (item) => {
+            // Fetch the color details for the item based on Refcolor
+            const color = colors.find(color => color.refColor === item.Refcolor);
 
-                    const response = await axios.post('https://backendalaahd.onrender.com/api/orders', orderData);  // Adjust your endpoint
-                    return response.data._id;  // Assuming you get back the order's _id
-                })
-            );
+            if (color) {
+                const updatedStock = typeFacturation === 'customer'
+                    ? Math.max(0, color.stock_color - item.quantity) // Subtract for customer
+                    : color.stock_color + item.quantity; // Add for supplier
 
-            return orderIds;
-        } catch (error) {
-            console.error("Error inserting orders:", error);
-            throw new Error("Failed to insert orders");
-        }
-    };
+                // Update the stock in the database
+                const response = await axios.put(`https://backendalaahd.onrender.com/api/colors/${color._id}`, {
+                    stock_color: updatedStock,
+                });
 
-    const insertInvoice = async (orderIds: string[], items: InvoiceItem[]) => {
-        try {
-            // Call the calculateTotal function to get the total value
-            const totals = calculateTotal(items);  // Ensure calculateTotal accepts and processes the items
+                return response.data;
+            }
+        });
 
-            const invoiceData = {
-                invoiceRef: generateInvoiceRef(),  // Function to generate your invoice ref
-                orderId: orderIds,  // Insert orderId array
-                customerId: customerId,  // Assuming customerId is already set
-                adminId: adminId,  // Replace with the correct admin ID
-                productId: items.map(item => item.productId),  // Insert productId array
-                total: parseFloat(totals.total),  // Ensure the total is a number
-                type: typeFacturation,  // Example type
-            };
+        await Promise.all(stockUpdates); // Wait for all stock updates to complete
+        console.log("Stock updated successfully!");
+    } catch (error) {
+        console.error("Error updating stock:", error);
+        throw new Error("Failed to update stock");
+    }
+};
 
-            const response = await axios.post('https://backendalaahd.onrender.com/api/invoices', invoiceData);  // Adjust your endpoint
-            console.log("Invoice inserted successfully:", response.data);
-        } catch (error) {
-            console.error("Error inserting invoice:", error);
-            throw new Error("Failed to insert invoice");
-        }
-    };
+const insertInvoice = async (orderIds: string[], items: InvoiceItem[]) => {
+    try {
+        // Call the calculateTotal function to get the total value
+        const totals = calculateTotal(items); // Ensure calculateTotal accepts and processes the items
 
+        const invoiceData = {
+            invoiceRef: generateInvoiceRef(), // Function to generate your invoice ref
+            orderId: orderIds, // Insert orderId array
+            customerId: customerId, // Assuming customerId is already set
+            adminId: 'adminId_here', // Replace with the correct admin ID
+            productId: items.map(item => item.productId), // Insert productId array
+            total: parseFloat(totals.total), // Ensure the total is a number
+            type: typeFacturation, // Example type
+        };
 
+        const response = await axios.post('https://backendalaahd.onrender.com/api/invoices', invoiceData); // Adjust your endpoint
+        console.log("Invoice inserted successfully:", response.data);
+    } catch (error) {
+        console.error("Error inserting invoice:", error);
+        throw new Error("Failed to insert invoice");
+    }
+};
 
-    const handleSubmit = async () => {
-        try {
-            const orderIds = await insertOrders(items);
-            await insertInvoice(orderIds, items);
-            alert("Facture et commandes créées avec succès");
-        } catch (error) {
-            console.error("Erreur lors de la soumission:", error);
-            alert("Une erreur est survenue lors de la soumission. Veuillez réessayer.");
-        }
-    };
+const handleSubmit = async () => {
+    try {
+        const orderIds = await insertOrders(items); // Insert orders and get IDs
+        await insertInvoice(orderIds, items); // Insert the invoice
+        await updateStockQuantity(items); // Update stock based on the invoice type
+        alert("Facture, commandes créées, et stock mis à jour avec succès");
+    } catch (error) {
+        console.error("Erreur lors de la soumission:", error);
+        alert("Une erreur est survenue lors de la soumission. Veuillez réessayer.");
+    }
+};
 
 
 
