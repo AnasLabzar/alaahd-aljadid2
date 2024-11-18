@@ -59,15 +59,27 @@ const DetailInvoice: React.FC<{ id: string }> = ({ id }) => {
 
             setItems(orderItems);
 
-            const userResponse = await axios.get(`https://backendalaahd.onrender.com/api/users/${invoiceResponse.data.customerId}`);
-            const userData = userResponse.data;
+            // Try to fetch the user data
+            try {
+                const userResponse = await axios.get(`https://backendalaahd.onrender.com/api/users/${invoiceResponse.data.customerId}`);
+                const userData = userResponse.data;
 
-            // If adminId is not available, set it to 'N/A'
-            if (!userData.adminId) {
-                userData.adminId = 'N/A';
+                // If adminId is not available, set it to 'N/A'
+                if (!userData.adminId) {
+                    userData.adminId = 'N/A';
+                }
+
+                setUser(userData);
+
+            } catch (error) {
+                // If the error is a 500 Internal Server Error, skip user data fetching
+                if (error.response && error.response.status === 500) {
+                    console.log('User is blocked or server error occurred, skipping user fetch.');
+                } else {
+                    // Log other errors
+                    console.error("Error fetching user data:", error);
+                }
             }
-
-            setUser(userData);
         } catch (error) {
             console.error("Error fetching invoice data:", error);
         } finally {
