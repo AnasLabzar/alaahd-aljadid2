@@ -14,6 +14,11 @@
     width: 42em;
 }
 
+table.MuiTable-root.css-uo99a3 th, 
+table.MuiTable-root.css-uo99a3 td{
+    padding: 4px;
+}
+
 @layer components {
 }
 
