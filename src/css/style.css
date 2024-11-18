@@ -19,6 +19,10 @@ table.MuiTable-root.css-uo99a3 td{
     padding: 4px;
 }
 
+table.MuiTable-root.css-uo99a3 td {
+    font-size: 12px;
+}
+
 @layer components {
 }
 
