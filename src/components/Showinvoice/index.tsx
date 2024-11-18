@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import axios from 'axios';
+import { AxiosError } from 'axios'; // Import AxiosError type
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 
@@ -71,13 +72,18 @@ const DetailInvoice: React.FC<{ id: string }> = ({ id }) => {
 
                 setUser(userData);
 
-            } catch (error) {
-                // If the error is a 500 Internal Server Error, skip user data fetching
-                if (error.response && error.response.status === 500) {
-                    console.log('User is blocked or server error occurred, skipping user fetch.');
+            } catch (error: unknown) { // Specify `unknown` type for error
+                // Type guard for AxiosError
+                if (axios.isAxiosError(error)) {
+                    // If the error is a 500 Internal Server Error, skip user data fetching
+                    if (error.response && error.response.status === 500) {
+                        console.log('User is blocked or server error occurred, skipping user fetch.');
+                    } else {
+                        // Log other errors
+                        console.error("Error fetching user data:", error);
+                    }
                 } else {
-                    // Log other errors
-                    console.error("Error fetching user data:", error);
+                    console.error("Unexpected error:", error);
                 }
             }
         } catch (error) {
