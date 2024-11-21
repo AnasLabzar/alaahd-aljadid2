@@ -293,20 +293,28 @@ const AddInvoice = () => {
 
     const totals = calculateTotal(items); // Get all totals (subtotal, tax, promotion, final total)
 
-    const insertOrders = async (items: InvoiceItem[]): Promise<string[]> => {
+const insertOrders = async (items: InvoiceItem[]): Promise<string[]> => {
     try {
-        // Assuming you have an API endpoint for inserting orders
-        const response = await axios.post('https://backendalaahd.onrender.com/api/orders', {
-            items, // Sending the items to your backend
-        });
+        const orders = items.map((item) => ({
+            refOrder: generateOrderRef(),
+            totalProfit: calculateTotalProfit(item.profit, item.quantity),
+            ordred: new Date(ordredDate).toISOString(),
+            dueDate: new Date(dueDate).toISOString(),
+            quantity: item.quantity,
+            total: item.price * item.quantity,
+            discount: promotion,
+            status,
+            note: item.description,
+        }));
 
-        // Assuming the response returns an array of order IDs
-        return response.data.orderIds;
+        const response = await axios.post('https://backendalaahd.onrender.com/api/orders', { orders });
+        return response.data.orderIds; // Backend should return order IDs for all inserted orders
     } catch (error) {
-        console.error('Error inserting orders:', error);
-        return []; // Return an empty array if there is an error
+        console.error("Error inserting orders:", error);
+        return [];
     }
 };
+
 
 
     // Handle input change
