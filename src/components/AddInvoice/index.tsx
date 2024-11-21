@@ -293,29 +293,31 @@ const AddInvoice = () => {
 
     const totals = calculateTotal(items); // Get all totals (subtotal, tax, promotion, final total)
 
-const insertOrders = async (items: InvoiceItem[]): Promise<string[]> => {
-    try {
-        const orders = items.map((item) => ({
-            refOrder: generateOrderRef(),
-            totalProfit: calculateTotalProfit(item.profit, item.quantity),
-            ordred: new Date(ordredDate).toISOString(),
-            dueDate: new Date(dueDate).toISOString(),
-            quantity: item.quantity,
-            total: item.price * item.quantity,
-            discount: promotion,
-            status,
-            note: item.description,
-        }));
-
-        const response = await axios.post('https://backendalaahd.onrender.com/api/orders', { orders });
-        return response.data.orderIds; // Backend should return order IDs for all inserted orders
-    } catch (error) {
-        console.error("Error inserting orders:", error);
-        return [];
-    }
-};
-
-
+    const insertOrders = async (items: InvoiceItem[]): Promise<string[]> => {
+        try {
+            // Prepare the order data by mapping over each item
+            const orders = items.map((item) => ({
+                refOrder: generateOrderRef(),  // Ensure this generates a unique reference
+                totalProfit: calculateTotalProfit(item.profit, item.quantity),  // Calculate profit per item
+                ordred: new Date(ordredDate).toISOString(),  // Ensure ordredDate is set properly
+                dueDate: new Date(dueDate).toISOString(),  // Ensure dueDate is set properly
+                quantity: item.quantity,  // Ensure quantity is provided
+                total: item.price * item.quantity,  // Calculate total price
+                discount: promotion,  // Ensure promotion is applied
+                status,  // Ensure status is provided (check if it's a valid value)
+                note: item.description,  // Provide a note if required
+            }));
+    
+            // Send the orders array to the backend
+            const response = await axios.post('https://backendalaahd.onrender.com/api/orders', { orders });
+            
+            // Assuming the response contains an array of order IDs
+            return response.data.orderIds;
+        } catch (error) {
+            console.error("Error inserting orders:", error);
+            return [];
+        }
+    };
 
     // Handle input change
     const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
