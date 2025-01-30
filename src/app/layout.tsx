@@ -1,5 +1,5 @@
 "use client";
-import "jsvectormap/dist/css/jsvectormap.css";
+// import "jsvectormap/dist/css/jsvectormap.css";
 import "flatpickr/dist/flatpickr.min.css";
 import "@/css/satoshi.css";
 import "@/css/style.css";
@@ -27,6 +27,7 @@ export default function RootLayout({
     <html lang="en">
       <Head>
         <link href="https://cdn.jsdelivr.net/npm/tailwindcss@3.3.0/dist/tailwind.min.css" rel="stylesheet" />
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jsvectormap/dist/css/jsvectormap.css" />
       </Head>
       <body suppressHydrationWarning={true}>
         {loading ? <Loader /> : children}

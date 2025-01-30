@@ -55,7 +55,7 @@ const ButtonUploadXlsx: React.FC<ExcelUploadFormProps> = ({ onUpload }) => {
           profit: product["Profit"],
           margin: product["Margin"],
         };
-        const priceResponse = await axios.post('http://localhost:8080/price/add-new', priceData);
+        const priceResponse = await axios.post('https://backendalaahd.onrender.com/api/price/add-new', priceData);
         const priceId = priceResponse.data._id;
 
         const colorsIds = await Promise.all(
@@ -72,7 +72,7 @@ const ButtonUploadXlsx: React.FC<ExcelUploadFormProps> = ({ onUpload }) => {
                 name: colorObj.name,
                 stock_color: colorObj.stock,
               };
-              const colorResponse = await axios.post('http://localhost:8080/color/add-new', colorData);
+              const colorResponse = await axios.post('https://backendalaahd.onrender.com/api/color/add-new', colorData);
               console.log('Color successfully added:', colorResponse.data);
 
               return colorResponse.data._id;
@@ -87,7 +87,7 @@ const ButtonUploadXlsx: React.FC<ExcelUploadFormProps> = ({ onUpload }) => {
           sku: product["CODE"],
           barcode: product["CODE"],
         };
-        const skuResponse = await axios.post('http://localhost:8080/sku/add-new', skuData);
+        const skuResponse = await axios.post('https://backendalaahd.onrender.com/api/sku/add-new', skuData);
         const skuId = skuResponse.data._id;
 
         const productData = {
@@ -100,7 +100,7 @@ const ButtonUploadXlsx: React.FC<ExcelUploadFormProps> = ({ onUpload }) => {
           skuId: skuId,
           categoryId: product["CategoryId"],
         };
-        const productResponse = await axios.post('http://localhost:8080/product/add-new', productData);
+        const productResponse = await axios.post('https://backendalaahd.onrender.com/api/product/add-new', productData);
         const productId = productResponse.data._id;
         console.log('This is Product ID:', productId);
       }

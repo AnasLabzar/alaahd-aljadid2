@@ -412,7 +412,7 @@ const insertInvoice = async (orderIds: string[], items: InvoiceItem[]) => {
             invoiceRef: generateInvoiceRef(), // Function to generate your invoice ref
             orderId: orderIds, // Insert orderId array
             customerId: customerId, // Assuming customerId is already set
-            adminId: 'adminId_here', // Replace with the correct admin ID
+            adminId: adminId, // Replace with the correct admin ID
             productId: items.map(item => item.productId), // Insert productId array
             total: parseFloat(totals.total), // Ensure the total is a number
             type: typeFacturation, // Example type
@@ -716,6 +716,7 @@ const handleSubmit = async () => {
                             <option value="paid">Payée</option>
                             <option value="credit">Credit</option>
                             <option value="cancel">Eliminer</option>
+                            <option value="cancel">Modul</option>
                         </select>
                     </div>
 

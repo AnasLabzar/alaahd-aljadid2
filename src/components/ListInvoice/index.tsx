@@ -366,7 +366,7 @@ const ListInvoice = () => {
                         </select>
                     </div>
 
-                    {/* Start Date Filter */}
+                    Start Date Filter
                     <div className="w-full md:w-1/3 relative flex items-center">
                         <FaCalendarAlt className="absolute left-3 text-white-dark" />
                         <DatePicker
@@ -441,9 +441,9 @@ const ListInvoice = () => {
                                             </td>
                                             <td className="border-[#eee] px-4 py-4 dark:border-dark-3">{customerName}</td>
                                             <td className="border-[#eee] px-4 py-4 dark:border-dark-3">
-                                                {users[invoice.customerId]?.role === 'custom'
-                                                    ? `Client`
-                                                    : `Fournisseur`}
+                                                {users[invoice.customerId]?.role === 'fournisseur'
+                                                    ? `Fournisseur`
+                                                    : `Client`}
                                             </td>
                                             <td className="border-[#eee] px-4 py-4 dark:border-dark-3">
                                                 <span className={`rounded-full text-[14px] px-5 py-2 capitalize ${backgroundColor} ${textColor}`}>
@@ -451,8 +451,8 @@ const ListInvoice = () => {
                                                 </span>
                                             </td>
                                             <td className="border-[#eee] px-4 py-4 dark:border-dark-3">
-                                                <span className={invoice.type === "customer" ? "text-green-500" : "text-red-500"}>
-                                                    {invoice.type === "customer" ? `+${invoice.total} dh` : `-${invoice.total} dh`}
+                                                <span className={invoice.type === "fournisseur" ? "text-red-500" : "text-green-500"}>
+                                                    {invoice.type === "fournisseur" ? `-${invoice.total} dh` : `+${invoice.total} dh`}
                                                 </span>
                                             </td>
                                             <td className="border-[#eee] px-4 py-4 dark:border-dark-3">

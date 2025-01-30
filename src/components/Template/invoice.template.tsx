@@ -18,6 +18,8 @@ import Image from "next/image";
 import StatusBadge from '../Badge/BadgeStatus';
 import { EditOutlined, DownloadOutlined, PrinterOutlined } from '@ant-design/icons';
 import StatusChip, { StatusType } from '../Badge/BadgeStatus';
+import { exit } from 'process';
+import { log } from 'console';
 
 interface InvoiceTemplateProps {
     invoiceId: string;
@@ -68,6 +70,10 @@ interface ColorData {
     name: string;
 }
 
+function ccyFormat(num: number) {
+    return `${num.toFixed(2)}`;
+}
+
 const InvoiceTemplate: React.FC<InvoiceTemplateProps> = ({ invoiceId }) => {
     const columns: Column[] = [
         { id: 'id', label: 'ID', minWidth: 8 },
@@ -80,7 +86,7 @@ const InvoiceTemplate: React.FC<InvoiceTemplateProps> = ({ invoiceId }) => {
     const [invoiceData, setInvoiceData] = useState<InvoiceData | null>(null);
     const [orderData, setOrderData] = useState<OrderData[]>([]);
     const [customerData, setCustomerData] = useState<CustomerData | null>(null);
-    const [adminData, setAdminData] = useState<AdminData | null>(null);
+    const [adminData, setAdminData] = useState<Partial<AdminData> | null>(null);
     const [productData, setProductData] = useState<ProductData[]>([]);
     const [colorsData, setColorsData] = useState<ColorData[]>([]);
     const [subtotal, setSubtotal] = useState(0);
@@ -101,8 +107,22 @@ const InvoiceTemplate: React.FC<InvoiceTemplateProps> = ({ invoiceId }) => {
                 const customerResponse = await axios.get<CustomerData>(`https://backendalaahd.onrender.com/api/users/${invoiceData.customerId}`);
                 const customerData = customerResponse.data;
 
-                const adminResponse = await axios.get<AdminData>(`https://backendalaahd.onrender.com/api/users/${invoiceData.adminId}`);
-                const adminData = adminResponse.data;
+                if (invoiceData.adminId === 'adminId_here') {
+                    setAdminData({
+                        username: 'Not Available',
+                    });
+                    console.log('Admin ID matches, skipping admin data fetch.');
+                } else {
+                    try {
+                        const adminResponse = await axios.get<AdminData>(
+                            `https://backendalaahd.onrender.com/api/users/${invoiceData.adminId}`
+                        );
+                        const adminData = adminResponse.data;
+                        setAdminData(adminData);
+                    } catch (error) {
+                        console.log('Error fetching admin data:', error);
+                    }
+                }
 
                 const productResponses = await Promise.all(
                     invoiceData.productId.map(productId => axios.get<ProductData>(`https://backendalaahd.onrender.com/api/products/${productId}`))
@@ -120,7 +140,7 @@ const InvoiceTemplate: React.FC<InvoiceTemplateProps> = ({ invoiceId }) => {
                             })
                     )
                 );
-                
+
                 // Filter null values with type assertion
                 const colorsData = colorResponses.filter((color): color is ColorData => color !== null);
 
@@ -132,7 +152,6 @@ const InvoiceTemplate: React.FC<InvoiceTemplateProps> = ({ invoiceId }) => {
                 setInvoiceData(invoiceData);
                 setOrderData(orderData);
                 setCustomerData(customerData);
-                setAdminData(adminData);
                 setProductData(productData);
                 setColorsData(colorsData);
                 setSubtotal(subtotal);
@@ -146,9 +165,10 @@ const InvoiceTemplate: React.FC<InvoiceTemplateProps> = ({ invoiceId }) => {
         fetchInvoiceData();
     }, [invoiceId]);
 
+
     const grandTotal = subtotal - (subtotal * (discount / 100));
 
-    if (!invoiceData || !orderData || !customerData || !adminData || !productData || !colorsData) {
+    if (!invoiceData || !orderData || !customerData || !productData || !colorsData) {
         return <div>Loading...</div>;
     }
 
@@ -208,16 +228,16 @@ const InvoiceTemplate: React.FC<InvoiceTemplateProps> = ({ invoiceId }) => {
                 </Grid>
                 <Grid item xs={6} style={{ display: 'flex', alignItems: 'flex-end', flexDirection: 'column' }}>
                     <Stack style={{ flexDirection: 'row', gap: '6px' }}>
-                        <Typography className="text-gray-700 text-[16px] font-bold dark:text-gray-500" gutterBottom>
-                            Date
+                        <Typography className="text-gray-700 text-[12px] font-bold dark:text-gray-500" gutterBottom>
+                            Imprimé Le
                         </Typography>
-                        <Typography className="text-gray-700 text-[16px] dark:text-gray-600" variant="body1" gutterBottom>
+                        <Typography className="text-gray-700 text-[12px] dark:text-gray-600" variant="body1" gutterBottom>
                             {formatDate(orderData[0].ordred)}
                         </Typography>
                     </Stack>
                     <Stack style={{ flexDirection: 'row', gap: '6px' }}>
                         <Typography className="text-gray-700 dark:text-gray-500" gutterBottom>
-                            Due Date
+                            Date d'échéance:
                         </Typography>
                         <Typography className="font-bold text-gray-700 dark:text-gray-600" variant="body1" gutterBottom>
                             {formatDate(orderData[0].dueDate)}
@@ -326,30 +346,18 @@ const InvoiceTemplate: React.FC<InvoiceTemplateProps> = ({ invoiceId }) => {
             {/* Invoice Totals */}
             <Grid item mt={3} xs={12}>
                 <Stack>
-                    <Grid container xs={12}>
-                        <Typography variant="body1" className="text-gray-700 dark:text-gray-500" gutterBottom>
-                            Sub Total:
-                        </Typography>
-                        <Typography variant="body1" gutterBottom>
-                            {subtotal.toFixed(2)}
-                        </Typography>
-                    </Grid>
-                    <Grid container xs={12}>
-                        <Typography variant="body1" className="text-gray-700 dark:text-gray-500" gutterBottom>
-                            Discount:
-                        </Typography>
-                        <Typography variant="body1" style={{ color: 'green' }} gutterBottom>
-                            {(subtotal * (discount / 100)).toFixed(2)}
-                        </Typography>
-                    </Grid>
-                    <Grid container xs={12}>
-                        <Typography variant="body1" style={{ fontWeight: 'bold' }} className="text-gray-700 dark:text-gray-500" gutterBottom>
-                            Grand Total:
-                        </Typography>
-                        <Typography variant="body1" style={{ fontWeight: 'bold' }} gutterBottom>
-                            {grandTotal.toFixed(2)} DH
-                        </Typography>
-                    </Grid>
+                    <TableRow>
+                        <TableCell colSpan={2}>Subtotal</TableCell>
+                        <TableCell align="right">{ccyFormat(subtotal)}</TableCell>
+                    </TableRow>
+                    <TableRow>
+                        <TableCell>Discount</TableCell>
+                        <TableCell align="right">{ccyFormat(subtotal * (discount / 100))}</TableCell>
+                    </TableRow>
+                    <TableRow>
+                        <TableCell style={{ fontWeight:`bold` }} colSpan={2}>Total</TableCell>
+                        <TableCell style={{ fontWeight:`bold` }} align="right">{ccyFormat(grandTotal)} DH</TableCell>
+                    </TableRow>
                 </Stack>
             </Grid>
         </Grid >
