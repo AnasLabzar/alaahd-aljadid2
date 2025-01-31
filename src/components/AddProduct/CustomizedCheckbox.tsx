@@ -66,14 +66,12 @@ const BpCheckbox: React.FC<BpCheckboxProps> = (props) => {
 interface CustomizedCheckboxProps {
   checked: boolean;
   onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  name?: string;  // Add name as an optional prop
 }
 
-const CustomizedCheckbox: React.FC<CustomizedCheckboxProps> = ({ checked, onChange }) => {
-  return (
-    <div>
-      <BpCheckbox checked={checked} onChange={onChange} />
-    </div>
-  );
+const CustomizedCheckbox: React.FC<CustomizedCheckboxProps> = ({ checked, onChange, name }) => {
+  return <input type="checkbox" name={name} checked={checked} onChange={onChange} />;
 };
+
 
 export default CustomizedCheckbox;

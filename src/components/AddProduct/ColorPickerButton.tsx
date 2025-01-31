@@ -7,19 +7,22 @@ import Alert from '@mui/material/Alert';
 import Typography from '@mui/material/Typography';
 import Fab from '@mui/material/Fab';
 
-// Define the color object structure
-interface ColorButton {
+// types.ts
+export interface ColorButton {
   color: string;
   name: string;
-  stock: string;
+  stock: number; // Ensure stock is a number
 }
+
 
 // Define prop types
 interface ColorPickerButtonProps {
   onColorsSelect: (colors: ColorButton[]) => void;
   error?: { [key: string]: boolean };
   helperText?: { [key: string]: string };
+  colorName?: string; // ✅ Add this if needed
 }
+
 
 const ColorPickerButton: React.FC<ColorPickerButtonProps> = ({ onColorsSelect, error = {}, helperText = {} }) => {
   const [showColorPicker, setShowColorPicker] = useState<boolean>(false);
@@ -41,15 +44,15 @@ const ColorPickerButton: React.FC<ColorPickerButtonProps> = ({ onColorsSelect, e
 
   // Save new color button
   const handleColorSave = () => {
-    if (colorButtons.length >= 10) {
-      setExceededLimit(true);
-      return;
-    }
-    const newColor: ColorButton = { color: buttonColor, name: colorName, stock: colorStock };
+    const newColor: ColorButton = {
+      color: buttonColor,
+      name: colorName,
+      stock: Number(colorStock) // Convert to number
+    };
+
     const updatedColors = [...colorButtons, newColor];
     setColorButtons(updatedColors);
-    onColorsSelect(updatedColors); // Notify parent component
-    setShowColorPicker(false);
+    onColorsSelect(updatedColors);
   };
 
   // Close color picker
@@ -86,7 +89,7 @@ const ColorPickerButton: React.FC<ColorPickerButtonProps> = ({ onColorsSelect, e
               value={btn.stock}
               onChange={(e) => {
                 const newButtons = [...colorButtons];
-                newButtons[index].stock = e.target.value;
+                newButtons[index].stock = Number(e.target.value) || 0; // Convert to number
                 setColorButtons(newButtons);
               }}
               error={!!error[`color${index}`]}
@@ -122,7 +125,7 @@ const ColorPickerButton: React.FC<ColorPickerButtonProps> = ({ onColorsSelect, e
               variant="outlined"
               sx={{ border: '1px solid #ffd66680', background: '#fffbe6', marginTop: '2em' }}
               icon={<i className="fa-duotone fa-solid fa-circle-exclamation" style={{ color: '#faad14' }}></i>}
-        
+
             >
               <Typography variant="h6">Maximum limit of 10 colors reached.</Typography>
             </Alert>

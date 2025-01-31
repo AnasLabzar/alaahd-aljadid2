@@ -9,7 +9,6 @@ import {
     TextField,
     InputAdornment,
     Divider,
-    Link,
     Typography,
     FormControl,
     InputLabel,
@@ -19,6 +18,7 @@ import {
     Alert,
 } from '@mui/material';
 import axios from "axios";
+import { Link } from "react-router-dom";
 import ButtonUploadXlsx from "../Buttons/ButtonUploadXlsx";
 import MediaUploader from "./MediaUploader";
 import ReactQuill from 'react-quill';
@@ -39,7 +39,7 @@ interface FormData {
     cost: string;
     profit: string;
     margin: string;
-    colors: { color: string; name: string; stock: number }[]; // Adjust if colors have a different structure
+    colors: ColorButton[]; // Ensure this expects `stock: number`
     weight: string;
     units_type: string;
     depth: string;
@@ -88,11 +88,27 @@ const units_type = [
     },
 ];
 
+type ColorButton = {
+    color: string;
+    name: string;
+    stock: number; // ✅ Make sure it's a number
+};
+
+
+type Errors = {
+    colors?: { message: string }[];
+};
+
+
+
+
 interface SkuCodeBarProps {
     onSkuSelect: (sku: string[]) => void; // Accept an array of SKUs
     onColorsName: string[];
-  }
-  
+}
+
+
+
 
 const AddProduct: React.FC = () => {
     const [formData, setFormData] = useState<FormData>({
@@ -128,11 +144,14 @@ const AddProduct: React.FC = () => {
     const [showError, setShowError] = useState<boolean>(false);
     const [errors, setErrors] = useState<Partial<FormData>>({});
 
-    const handleColorsSelect = (selectedColors: FormData["colors"]) => {
-        setFormData((prevState) => ({
-            ...prevState,
-            colors: selectedColors,
+    const handleColorsSelect = (selectedColors: ColorButton[]) => {
+        const mappedColors = selectedColors.map(color => ({
+            color: color.color,
+            name: color.name,
+            stock: Number(color.stock), // Ensure stock is a number
         }));
+
+        setFormData(prev => ({ ...prev, colors: mappedColors }));
     };
 
     const handleImagesSelect = (images: string[]) => {
@@ -149,7 +168,7 @@ const AddProduct: React.FC = () => {
             barcode: SKU, // Assuming barcode is derived from a single SKU
         }));
     };
-    
+
 
     const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const selectedCategoryId = e.target.value;
@@ -168,14 +187,11 @@ const AddProduct: React.FC = () => {
         setSelectedCurrency(currency);
     };
 
-    const handleDimensionChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        const unitsType = e.target.value;
-        setFormData((prevState) => ({
-            ...prevState,
-            units_type: unitsType,
-        }));
-        setSelectedDimension(unitsType);
+    const handleDimensionChange = (event: React.ChangeEvent<{ value: unknown }>) => {
+        const selectedValue = event.target.value as string; // ✅ Type assertion
+        setFormData(prev => ({ ...prev, units_type: selectedValue }));
     };
+
 
     const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setIsChecked(event.target.checked);
@@ -408,13 +424,12 @@ const AddProduct: React.FC = () => {
                                 Description
                             </Typography>
                             <ReactQuill
-                                name="description"
-                                label="Description"
                                 theme="snow"
                                 value={formData.description}
-                                onChange={(value) => setFormData((prevFormData) => ({ ...prevFormData, description: value }))}
-                                fullWidth
-                                style={{ marginTop: '20px' }}
+                                onChange={(value) =>
+                                    setFormData((prevFormData) => ({ ...prevFormData, description: value }))
+                                }
+                                style={{ marginTop: "20px" }}
                             />
                         </Paper>
                         <MediaUploader onImagesSelect={handleImagesSelect} />
@@ -483,7 +498,10 @@ const AddProduct: React.FC = () => {
                             </Grid>
                             <Divider sx={{ margin: '2em 0' }} />
                             <Grid container style={{ cursor: 'pointer' }} mt={1} mb={2}>
-                                <CustomizedCheckbox checked={showTaxField} name='tax_status' onChange={() => setShowTaxField(!showTaxField)} />
+                                <CustomizedCheckbox
+                                    checked={showTaxField}
+                                    onChange={() => setShowTaxField(!showTaxField)}
+                                />
                                 <Typography sx={{ fontSize: '13px', display: 'flex', alignItems: 'center', opacity: '.8' }}>
                                     Charge tax on this product
                                 </Typography>
@@ -562,22 +580,33 @@ const AddProduct: React.FC = () => {
                                 <Typography variant="subtitle1" gutterBottom>
                                     Quantity
                                 </Typography>
-                                <Link to="/" style={{ cursor: 'pointer', display: 'flex', alignItems: 'right' }}>
-                                    <Typography gutterBottom>
-                                        Edit type of quantity
-                                    </Typography>
+                                <Link to="/" style={{ cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
+                                    <Typography gutterBottom>Edit type of quantity</Typography>
                                 </Link>
+
                             </Grid>
                             <Divider variant="fullWidth" />
-                                <Typography variant="subtitle1" gutterBottom>
-                                    Add colors
-                                </Typography>
-                                <ColorPickerButton colorName="Custom Color" error={!!errors.color} helperText={errors.color} onChange={handleColorsSelect} onColorsSelect={handleColorsSelect} />
+                            <Typography variant="subtitle1" gutterBottom>
+                                Add colors
+                            </Typography>
+                            <ColorPickerButton
+                                colorName="Custom Color"
+                                error={errors.colors ? { colors: true } : {}} // ✅ Assigns correct error object
+                                // onChange={handleColorsSelect}
+                                // onColorsSelect={(colors: ColorButton[]) => handleColorsSelect(colors)} // ✅ Ensures type compatibility
+                                onColorsSelect={handleColorsSelect} // ✅ Pass the correct function
+                            />
 
-                                <Typography variant="subtitle1" gutterBottom>
-                                    Stock Keeping Unit
-                                </Typography>
-                                <SkuCodeBar onSkuSelect={handleSkuSelect} error={!!errors.sku} helperText={errors.sku} onColorsName={formData.colors.map(color => color.name)} />
+
+                            <Typography variant="subtitle1" gutterBottom>
+                                Stock Keeping Unit
+                            </Typography>
+
+                            <SkuCodeBar
+                                error={errors.colors ? { colors: true } : {}} // ✅ Properly assigns error state
+                                onColorsName={formData.colors.map(color => color.name)}
+                                onSkuSelect={handleSkuSelect}
+                            />
                         </Paper>
 
                         <Paper style={{ padding: '20px', marginBottom: '20px' }}>
@@ -606,7 +635,7 @@ const AddProduct: React.FC = () => {
                                 <Grid item xs={3}>
                                     <TextField
                                         id="outlined-select-dimension"
-                                        select="mm"
+                                        select // ✅ Correct usage
                                         label="Select units Type"
                                         name="units_type"
                                         defaultValue="mm"
@@ -625,37 +654,39 @@ const AddProduct: React.FC = () => {
                                     <TextField
                                         label="Depth"
                                         name="depth"
-                                        placeholder='0.00'
+                                        placeholder="0.00"
                                         onChange={handleChange}
                                         type="number"
                                         InputProps={{
                                             startAdornment: (
-                                                <InputAdornment>
+                                                <InputAdornment position="start"> {/* ✅ Add position */}
                                                     {selectedDimension}
                                                 </InputAdornment>
                                             ),
                                         }}
                                     />
-
                                 </Grid>
+
                                 <Grid item xs={3}>
                                     <TextField
                                         placeholder="0.00"
                                         id="outlined-start-adornment"
                                         label="Height"
                                         name="height"
-                                        error={!!errors.height} helperText={errors.height}
+                                        error={!!errors.height}
+                                        helperText={errors.height}
                                         type="number"
                                         onChange={handleChange}
                                         InputProps={{
                                             startAdornment: (
-                                                <InputAdornment>
+                                                <InputAdornment position="start"> {/* ✅ Add position */}
                                                     {selectedDimension}
                                                 </InputAdornment>
                                             ),
                                         }}
                                     />
                                 </Grid>
+
                                 <Grid item xs={3}>
                                     <TextField
                                         placeholder="0.00"
@@ -666,7 +697,7 @@ const AddProduct: React.FC = () => {
                                         onChange={handleChange}
                                         InputProps={{
                                             startAdornment: (
-                                                <InputAdornment>
+                                                <InputAdornment position="start"> {/* ✅ Add position */}
                                                     {selectedDimension}
                                                 </InputAdornment>
                                             ),
@@ -680,7 +711,10 @@ const AddProduct: React.FC = () => {
                                 Back
                             </Button> */}
                             <Button
-                                onClick={handleSubmit}
+                                onClick={(e) => {
+                                    e.preventDefault(); // Prevents form submission
+                                    handleSubmit(e as unknown as React.FormEvent<HTMLFormElement>); // ✅ Cast MouseEvent to FormEvent
+                                }}
                                 variant="contained"
                                 color="primary"
                             >

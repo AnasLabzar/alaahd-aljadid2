@@ -9,6 +9,7 @@ import Switch from '@mui/material/Switch';
 interface SkuCodeBarProps {
   onSkuSelect: (sku: string) => void;
   onColorsName: string[];
+  error?: { [key: string]: boolean };
 }
 
 const SkuCodeBar: React.FC<SkuCodeBarProps> = ({ onSkuSelect, onColorsName }) => {

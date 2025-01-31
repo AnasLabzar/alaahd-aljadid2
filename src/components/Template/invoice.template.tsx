@@ -291,9 +291,23 @@ const InvoiceTemplate: React.FC<InvoiceTemplateProps> = ({ invoiceId }) => {
                     <Typography className="text-gray-900 dark:text-gray-700" style={{ fontSize: '15px', margin: '0', fontWeight: '700', opacity: '.7', display: 'flex', justifyContent: 'start' }} gutterBottom>
                         Crée par monsieur:
                     </Typography>
-                    <Typography className="text-gray-700 dark:text-gray-600" style={{ fontSize: '13px', margin: '0', fontWeight: '500', opacity: '.7', display: 'flex', justifyContent: 'start', marginTop: '2px' }} variant="body1" gutterBottom>
-                        {adminData.username}
+                    <Typography
+                        className="text-gray-700 dark:text-gray-600"
+                        style={{
+                            fontSize: '13px',
+                            margin: '0',
+                            fontWeight: '500',
+                            opacity: '.7',
+                            display: 'flex',
+                            justifyContent: 'start',
+                            marginTop: '2px'
+                        }}
+                        variant="body1"
+                        gutterBottom
+                    >
+                        {adminData?.username || ''}  {/* ✅ Will render username if exists, otherwise empty string */}
                     </Typography>
+
                     <Typography
                         className="text-gray-700 dark:text-gray-600"
                         style={{ fontSize: '13px', margin: '0', fontWeight: '500', opacity: '.7', display: 'flex', justifyContent: 'start', marginTop: '2px' }}
@@ -355,8 +369,8 @@ const InvoiceTemplate: React.FC<InvoiceTemplateProps> = ({ invoiceId }) => {
                         <TableCell align="right">{ccyFormat(subtotal * (discount / 100))}</TableCell>
                     </TableRow>
                     <TableRow>
-                        <TableCell style={{ fontWeight:`bold` }} colSpan={2}>Total</TableCell>
-                        <TableCell style={{ fontWeight:`bold` }} align="right">{ccyFormat(grandTotal)} DH</TableCell>
+                        <TableCell style={{ fontWeight: `bold` }} colSpan={2}>Total</TableCell>
+                        <TableCell style={{ fontWeight: `bold` }} align="right">{ccyFormat(grandTotal)} DH</TableCell>
                     </TableRow>
                 </Stack>
             </Grid>
