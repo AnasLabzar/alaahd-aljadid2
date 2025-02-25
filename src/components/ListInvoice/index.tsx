@@ -94,12 +94,12 @@ const ListInvoice = () => {
         }
     };
 
-    // Auto-refresh every 60 seconds
-    useEffect(() => {
-        fetchInvoices(); // Initial fetch
-        const interval = setInterval(fetchInvoices, 60000); // Refresh every 60 seconds
-        return () => clearInterval(interval); // Cleanup on unmount
-    }, []);
+    // // Auto-refresh every 60 seconds
+    // useEffect(() => {
+    //     fetchInvoices(); // Initial fetch
+    //     const interval = setInterval(fetchInvoices, 60000); // Refresh every 60 seconds
+    //     return () => clearInterval(interval); // Cleanup on unmount
+    // }, []);
 
     // Show alerts for new invoices
     useEffect(() => {
@@ -211,90 +211,100 @@ const ListInvoice = () => {
     return (
         <div className="rounded-[10px] border border-stroke bg-white p-4 shadow-1 dark:border-dark-3 dark:bg-gray-dark dark:shadow-card sm:p-7.5">
             {/* Search Bar and Filters */}
-            <div className="flex justify-between items-center gap-4 md:gap-[19rem] w-full">
-                <div className="w-full md:w-2/5 flex items-center mb-4">
-                    <input
-                        type="text"
-                        placeholder="Search by customer or invoice reference"
-                        value={searchTerm}
-                        onChange={(e) => {
-                            setSearchTerm(e.target.value);
-                            setCurrentPage(1);
-                        }}
-                        className="w-full px-4 py-2 border border-gray-300 rounded focus:ring focus:ring-blue-300 transition duration-200"
-                    />
-                </div>
-                <div className="w-full md:w-4/5 flex items-center float-end justify-end gap-4">
-                    <div className="w-full md:w-1/3 flex items-center gap-2 px-4 py-2 border border-gray-300 rounded">
-                        <svg
-                            viewBox="0 0 64 64"
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="24"
-                            height="24"
-                            className="text-gray-500"
-                        >
-                            <g transform="matrix(1,0,0,1,0,0)">
-                                <g id="Layer_64" data-name="Layer 64">
-                                    <path
-                                        d="m61.44 13.57-3-10a1.5 1.5 0 0 0 -1.44-1.07h-50a1.5 1.5 0 0 0 -1.44 1.07l-3 10a1.52 1.52 0 0 0 .24 1.33 1.49 1.49 0 0 0 1.2.6h56a1.49 1.49 0 0 0 1.2-.6 1.52 1.52 0 0 0 .24-1.33z"
-                                        fill="#b3b3b3"
-                                        fill-opacity="1"
-                                    />
-                                    <path
-                                        d="m61.35 13.34a1.51 1.51 0 0 0 -1.35-.84h-56a1.51 1.51 0 0 0 -1.35.84 1.49 1.49 0 0 0 .17 1.58l17.25 22.16v22.92a1.51 1.51 0 0 0 1.5 1.5 1.52 1.52 0 0 0 .66-.15l20.86-10.29a1.51 1.51 0 0 0 .84-1.35v-12.63l17.25-22.16a1.49 1.49 0 0 0 .17-1.58z"
-                                        fill="#ffac32"
-                                        fill-opacity="1"
-                                    />
-                                </g>
-                            </g>
-                        </svg>
-                        <span className="w-full text-sm text-gray-700">Filter avec:</span>
-                        <select
-                            id="statusFilter"
-                            value={selectedStatus}
-                            aria-placeholder="Status"
-                            onChange={(e) => {
-                                setSelectedStatus(e.target.value);
-                                setCurrentPage(1);
-                            }}
-                            className="w-full px-3 py-2 border rounded focus:ring focus:ring-blue-300"
-                        >
-                            <option value="all" defaultChecked>
-                                Tous
-                            </option>
-                            <option value="pending">Pending</option>
-                            <option value="paid">Payée</option>
-                            <option value="retour">Retour</option>
-                            <option value="credit">Credit</option>
-                        </select>
-                    </div>
-                    <div className="w-full md:w-1/3 relative flex items-center">
-                        <FaCalendarAlt className="absolute left-3 text-white-dark" />
-                        <DatePicker
-                            selected={startDate ?? undefined}
-                            onChange={(date) => setStartDate(date)}
-                            selectsStart
-                            startDate={startDate ?? undefined}
-                            endDate={endDate ?? undefined}
-                            placeholderText="Start Date"
-                            className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded focus:ring focus:ring-blue-300"
+            // Update the header section (search bar and filters) to include the refresh button:
+<div className="flex justify-between items-center gap-4 md:gap-[19rem] w-full">
+    <div className="w-full md:w-2/5 flex items-center mb-4">
+        <input
+            type="text"
+            placeholder="Search by customer or invoice reference"
+            value={searchTerm}
+            onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setCurrentPage(1);
+            }}
+            className="w-full px-4 py-2 border border-gray-300 rounded focus:ring focus:ring-blue-300 transition duration-200"
+        />
+    </div>
+    <div className="w-full md:w-4/5 flex items-center float-end justify-end gap-4">
+        {/* Add the refresh button here */}
+        <button
+            onClick={fetchInvoices} // Call fetchInvoices on click
+            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+        >
+            Refresh
+        </button>
+
+        {/* Existing filters */}
+        <div className="w-full md:w-1/3 flex items-center gap-2 px-4 py-2 border border-gray-300 rounded">
+            <svg
+                viewBox="0 0 64 64"
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                className="text-gray-500"
+            >
+                <g transform="matrix(1,0,0,1,0,0)">
+                    <g id="Layer_64" data-name="Layer 64">
+                        <path
+                            d="m61.44 13.57-3-10a1.5 1.5 0 0 0 -1.44-1.07h-50a1.5 1.5 0 0 0 -1.44 1.07l-3 10a1.52 1.52 0 0 0 .24 1.33 1.49 1.49 0 0 0 1.2.6h56a1.49 1.49 0 0 0 1.2-.6 1.52 1.52 0 0 0 .24-1.33z"
+                            fill="#b3b3b3"
+                            fill-opacity="1"
                         />
-                    </div>
-                    <div className="w-full md:w-1/3 relative flex items-center">
-                        <FaCalendarAlt className="absolute left-3 text-white-dark" />
-                        <DatePicker
-                            selected={endDate}
-                            onChange={(date) => setEndDate(date)}
-                            selectsEnd
-                            startDate={startDate ?? undefined}
-                            endDate={endDate ?? undefined}
-                            minDate={startDate ?? undefined}
-                            placeholderText="End Date"
-                            className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded focus:ring focus:ring-blue-300"
+                        <path
+                            d="m61.35 13.34a1.51 1.51 0 0 0 -1.35-.84h-56a1.51 1.51 0 0 0 -1.35.84 1.49 1.49 0 0 0 .17 1.58l17.25 22.16v22.92a1.51 1.51 0 0 0 1.5 1.5 1.52 1.52 0 0 0 .66-.15l20.86-10.29a1.51 1.51 0 0 0 .84-1.35v-12.63l17.25-22.16a1.49 1.49 0 0 0 .17-1.58z"
+                            fill="#ffac32"
+                            fill-opacity="1"
                         />
-                    </div>
-                </div>
-            </div>
+                    </g>
+                </g>
+            </svg>
+            <span className="w-full text-sm text-gray-700">Filter avec:</span>
+            <select
+                id="statusFilter"
+                value={selectedStatus}
+                aria-placeholder="Status"
+                onChange={(e) => {
+                    setSelectedStatus(e.target.value);
+                    setCurrentPage(1);
+                }}
+                className="w-full px-3 py-2 border rounded focus:ring focus:ring-blue-300"
+            >
+                <option value="all" defaultChecked>
+                    Tous
+                </option>
+                <option value="pending">Pending</option>
+                <option value="paid">Payée</option>
+                <option value="retour">Retour</option>
+                <option value="credit">Credit</option>
+            </select>
+        </div>
+        <div className="w-full md:w-1/3 relative flex items-center">
+            <FaCalendarAlt className="absolute left-3 text-white-dark" />
+            <DatePicker
+                selected={startDate ?? undefined}
+                onChange={(date) => setStartDate(date)}
+                selectsStart
+                startDate={startDate ?? undefined}
+                endDate={endDate ?? undefined}
+                placeholderText="Start Date"
+                className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded focus:ring focus:ring-blue-300"
+            />
+        </div>
+        <div className="w-full md:w-1/3 relative flex items-center">
+            <FaCalendarAlt className="absolute left-3 text-white-dark" />
+            <DatePicker
+                selected={endDate}
+                onChange={(date) => setEndDate(date)}
+                selectsEnd
+                startDate={startDate ?? undefined}
+                endDate={endDate ?? undefined}
+                minDate={startDate ?? undefined}
+                placeholderText="End Date"
+                className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded focus:ring focus:ring-blue-300"
+            />
+        </div>
+    </div>
+</div>
 
             {/* Loading Indicator */}
             {loading ? (
