@@ -298,7 +298,7 @@ const AddInvoice = () => {
             const orderIds = await Promise.all(
                 items.map(async (item) => {
                     const orderData = {
-                        refOrder: generateOrderRef(item.customerId),
+                        refOrder: generateOrderRef(),
                         totalProfit: calculateTotalProfit(item.profit, item.quantity),
                         ordred: new Date(ordredDate).toISOString(),
                         dueDate: new Date(dueDate).toISOString(),
