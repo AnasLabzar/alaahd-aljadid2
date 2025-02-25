@@ -42,9 +42,10 @@ interface InvoiceItem {
     price: number;
     productId: string;
     Refcolor: string;
-    colors: ColorType[]; // Change this from never[] to ColorType[]
+    colors: ColorType[];
     searchTerm: string;
-    profit: number; // Ensure this is included
+    profit: number;
+    customerId: string; // Add this line
 }
 
 
@@ -202,6 +203,7 @@ const AddInvoice = () => {
                 total: 0,      // Initialize total field
                 discount: 0,   // Initialize discount field
                 productId: '',
+                customerId: customerId, // Add this line
                 Refcolor: '',
                 colors: [],
                 searchTerm: '', // Initialize search term for new item
@@ -294,32 +296,32 @@ const AddInvoice = () => {
     const totals = calculateTotal(items); // Get all totals (subtotal, tax, promotion, final total)
 
     const insertOrders = async (items: InvoiceItem[]): Promise<string[]> => {
-        try {
-            const orderIds = await Promise.all(
-                items.map(async (item) => {
-                    const orderData = {
-                        refOrder: generateOrderRef(),
-                        totalProfit: calculateTotalProfit(item.profit, item.quantity),
-                        ordred: new Date(ordredDate).toISOString(),
-                        dueDate: new Date(dueDate).toISOString(),
-                        quantity: item.quantity,
-                        total: item.price * item.quantity,
-                        discount: promotion,
-                        status,
-                        note: item.description,
-                    };
+    try {
+        const orderIds = await Promise.all(
+            items.map(async (item) => {
+                const orderData = {
+                    refOrder: generateOrderRef(item.customerId),
+                    totalProfit: calculateTotalProfit(item.profit, item.quantity),
+                    ordred: new Date(ordredDate).toISOString(),
+                    dueDate: new Date(dueDate).toISOString(),
+                    quantity: item.quantity,
+                    total: item.price * item.quantity,
+                    discount: promotion,
+                    status,
+                    note: item.description,
+                };
 
-                    const response = await axios.post('https://backendalaahd.onrender.com/api/orders', orderData);  // Adjust your endpoint
-                    return response.data._id;  // Assuming you get back the order's _id
-                })
-            );
+                const response = await axios.post('https://backendalaahd.onrender.com/api/orders', orderData);
+                return response.data._id;
+            })
+        );
 
-            return orderIds;
-        } catch (error) {
-            console.error("Error inserting orders:", error);
-            throw new Error("Failed to insert orders");
-        }
-    };
+        return orderIds;
+    } catch (error) {
+        console.error("Error inserting orders:", error);
+        throw new Error("Failed to insert orders");
+    }
+};
     
 
     // Handle input change
@@ -497,7 +499,6 @@ const handleSubmit = async () => {
                             <CustomerSelect
                                 id="customerSelect"
                                 onCustomerChange={(selectedCustomer) => setCustomerId(selectedCustomer)}
-                            // className="lg:w-[250px] w-2/3"
                             />
 
                         </div>
