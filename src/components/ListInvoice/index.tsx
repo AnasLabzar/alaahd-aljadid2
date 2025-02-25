@@ -211,7 +211,6 @@ const ListInvoice = () => {
     return (
         <div className="rounded-[10px] border border-stroke bg-white p-4 shadow-1 dark:border-dark-3 dark:bg-gray-dark dark:shadow-card sm:p-7.5">
             {/* Search Bar and Filters */}
-            // Update the header section (search bar and filters) to include the refresh button:
 <div className="flex justify-between items-center gap-4 md:gap-[19rem] w-full">
     <div className="w-full md:w-2/5 flex items-center mb-4">
         <input
