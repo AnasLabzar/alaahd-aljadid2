@@ -11,7 +11,6 @@ import Link from 'next/link'; // Import Link from next/link
 import { FormControl, TextField, InputLabel, Select, MenuItem } from '@mui/material'; // Import FormControl and other components here
 import AddProduct from '../Modal/ModalAddProduct';
 
-
 interface ProductType {
     _id: string;
     title: string;
@@ -23,8 +22,6 @@ type Item = {
     quantity: number;
     price: number;
 };
-
-
 
 interface ColorType {
     _id: string;
@@ -48,10 +45,7 @@ interface InvoiceItem {
     customerId: string; // Add this line
 }
 
-
-
 const AddInvoice = () => {
-
     const [items, setItems] = useState<InvoiceItem[]>([
         {
             _id: 1,
@@ -65,6 +59,7 @@ const AddInvoice = () => {
             colors: [],
             searchTerm: '', // Initialize search term
             profit: 0,
+            customerId: '', // Initialize customerId
         },
     ]);
 
@@ -82,7 +77,6 @@ const AddInvoice = () => {
     const [adminId, setAdminId] = useState<string>('');
     const [username, setUsername] = useState<string>('');
     const [status, setStatus] = useState<string>('pending');
-
 
     useEffect(() => {
         const fetchProducts = async () => {
@@ -145,15 +139,12 @@ const AddInvoice = () => {
                 console.error("productPriceId is empty");
             }
         }
-
     };
-
 
     const getProductPrice = async (productId: string): Promise<number> => {
         const response = await axios.get(`https://backendalaahd.onrender.com/api/products/${productId}`);
         return response.data.priceId; // Assuming the price is returned in the response
     };
-
 
     const fetchProductPrice = async (productPriceId: string): Promise<{ price: number; profit: number }> => {
         try {
@@ -173,13 +164,11 @@ const AddInvoice = () => {
                 console.error("Price or profit not found in the response");
                 return { price: 0, profit: 0 }; // Default values
             }
-
         } catch (error) {
             console.error('Error fetching product price:', error);
             return { price: 0, profit: 0 }; // Return default values
         }
     };
-
 
     const generateInvoiceRef = (): string => {
         const date = new Date();
@@ -215,7 +204,6 @@ const AddInvoice = () => {
             },
         ]);
     };
-
 
     const removeItem = (id: number) => {
         setItems(prevItems => prevItems.filter(item => item._id !== id));
@@ -296,33 +284,32 @@ const AddInvoice = () => {
     const totals = calculateTotal(items); // Get all totals (subtotal, tax, promotion, final total)
 
     const insertOrders = async (items: InvoiceItem[]): Promise<string[]> => {
-    try {
-        const orderIds = await Promise.all(
-            items.map(async (item) => {
-                const orderData = {
-                    refOrder: generateOrderRef(item.customerId),
-                    totalProfit: calculateTotalProfit(item.profit, item.quantity),
-                    ordred: new Date(ordredDate).toISOString(),
-                    dueDate: new Date(dueDate).toISOString(),
-                    quantity: item.quantity,
-                    total: item.price * item.quantity,
-                    discount: promotion,
-                    status,
-                    note: item.description,
-                };
+        try {
+            const orderIds = await Promise.all(
+                items.map(async (item) => {
+                    const orderData = {
+                        refOrder: generateOrderRef(item.customerId),
+                        totalProfit: calculateTotalProfit(item.profit, item.quantity),
+                        ordred: new Date(ordredDate).toISOString(),
+                        dueDate: new Date(dueDate).toISOString(),
+                        quantity: item.quantity,
+                        total: item.price * item.quantity,
+                        discount: promotion,
+                        status,
+                        note: item.description,
+                    };
 
-                const response = await axios.post('https://backendalaahd.onrender.com/api/orders', orderData);
-                return response.data._id;
-            })
-        );
+                    const response = await axios.post('https://backendalaahd.onrender.com/api/orders', orderData);
+                    return response.data._id;
+                })
+            );
 
-        return orderIds;
-    } catch (error) {
-        console.error("Error inserting orders:", error);
-        throw new Error("Failed to insert orders");
-    }
-};
-    
+            return orderIds;
+        } catch (error) {
+            console.error("Error inserting orders:", error);
+            throw new Error("Failed to insert orders");
+        }
+    };
 
     // Handle input change
     const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -332,7 +319,7 @@ const AddInvoice = () => {
         } else if (name === 'due-date') {
             setDueDate(value); // Date de fin
         }
-    }
+    };
 
     const generateOrderRef = (customerId: string): string => {
         const date = new Date();
@@ -340,7 +327,7 @@ const AddInvoice = () => {
         const month = String(date.getMonth() + 1).padStart(2, '0');
         const year = String(date.getFullYear());
         const randomNum = Math.floor(1000 + Math.random() * 9000); // Generates a 4-digit random number
-    
+
         // Construct the order reference with customer ID
         return `INV-${customerId}-${year}${month}${day}-${randomNum}`;
     };
@@ -354,119 +341,117 @@ const AddInvoice = () => {
     useEffect(() => {
         // Function to get a cookie by name
         const getCookie = (name: string): string | null => {
-          const value = `; ${document.cookie}`;
-          const parts = value.split(`; ${name}=`);
-          if (parts.length === 2) return parts.pop()?.split(';').shift() || null;
-          return null;
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop()?.split(';').shift() || null;
+            return null;
         };
-    
+
         // Get the `user-info` cookie value
         const userInfoCookie = getCookie('user-info');
-    
+
         // Parse it as JSON to access `username`
         if (userInfoCookie) {
-          try {
-            const userInfo = JSON.parse(userInfoCookie);
-            setAdminId(userInfo._id);
-            setUsername(userInfo.username);
-          } catch (error) {
-            console.error("Failed to parse user-info cookie:", error);
-          }
+            try {
+                const userInfo = JSON.parse(userInfoCookie);
+                setAdminId(userInfo._id);
+                setUsername(userInfo.username);
+            } catch (error) {
+                console.error("Failed to parse user-info cookie:", error);
+            }
         } else {
-          console.log("user-info cookie not found");
+            console.log("user-info cookie not found");
         }
-      }, []);
-
-
+    }, []);
 
     const updateStockQuantity = async (items: InvoiceItem[]) => {
-    try {
-        const stockUpdates = items.map(async (item) => {
-            // Fetch the color details for the item based on Refcolor
-            const color = colors.find(color => color.refColor === item.Refcolor);
+        try {
+            const stockUpdates = items.map(async (item) => {
+                // Fetch the color details for the item based on Refcolor
+                const color = colors.find(color => color.refColor === item.Refcolor);
 
-            if (color && typeof color.stock_color === 'number' && typeof item.quantity === 'number') {
-                const updatedStock = typeFacturation === 'customer'
-                    ? Math.max(0, color.stock_color - item.quantity) // Subtract for customer
-                    : color.stock_color + item.quantity; // Add for supplier
-            
-                // Update the stock in the database
-                const response = await axios.put(`https://backendalaahd.onrender.com/api/colors/${color._id}`, {
-                    stock_color: updatedStock,
-                });
-            }
-        });
+                if (color && typeof color.stock_color === 'number' && typeof item.quantity === 'number') {
+                    const updatedStock = typeFacturation === 'customer'
+                        ? Math.max(0, color.stock_color - item.quantity) // Subtract for customer
+                        : color.stock_color + item.quantity; // Add for supplier
 
-        await Promise.all(stockUpdates); // Wait for all stock updates to complete
-        console.log("Stock updated successfully!");
-    } catch (error) {
-        console.error("Error updating stock:", error);
-        throw new Error("Failed to update stock");
-    }
-};
+                    // Update the stock in the database
+                    const response = await axios.put(`https://backendalaahd.onrender.com/api/colors/${color._id}`, {
+                        stock_color: updatedStock,
+                    });
+                }
+            });
 
-const insertInvoice = async (orderIds: string[], items: InvoiceItem[]) => {
-    try {
-        // Call the calculateTotal function to get the total value
-        const totals = calculateTotal(items); // Ensure calculateTotal accepts and processes the items
+            await Promise.all(stockUpdates); // Wait for all stock updates to complete
+            console.log("Stock updated successfully!");
+        } catch (error) {
+            console.error("Error updating stock:", error);
+            throw new Error("Failed to update stock");
+        }
+    };
 
-        const invoiceData = {
-            invoiceRef: generateInvoiceRef(), // Function to generate your invoice ref
-            orderId: orderIds, // Insert orderId array
-            customerId: customerId, // Assuming customerId is already set
-            adminId: adminId, // Replace with the correct admin ID
-            productId: items.map(item => item.productId), // Insert productId array
-            total: parseFloat(totals.total), // Ensure the total is a number
-            type: typeFacturation, // Example type
-        };
+    const insertInvoice = async (orderIds: string[], items: InvoiceItem[]) => {
+        try {
+            // Call the calculateTotal function to get the total value
+            const totals = calculateTotal(items); // Ensure calculateTotal accepts and processes the items
 
-        const response = await axios.post('https://backendalaahd.onrender.com/api/invoices', invoiceData); // Adjust your endpoint
-        console.log("Invoice inserted successfully:", response.data);
-    } catch (error) {
-        console.error("Error inserting invoice:", error);
-        throw new Error("Failed to insert invoice");
-    }
-};
+            const invoiceData = {
+                invoiceRef: generateInvoiceRef(), // Function to generate your invoice ref
+                orderId: orderIds, // Insert orderId array
+                customerId: customerId, // Assuming customerId is already set
+                adminId: adminId, // Replace with the correct admin ID
+                productId: items.map(item => item.productId), // Insert productId array
+                total: parseFloat(totals.total), // Ensure the total is a number
+                type: typeFacturation, // Example type
+            };
 
-const handleSubmit = async () => {
-    try {
-        const orderIds = await insertOrders(items); // Insert orders and get IDs
-        await insertInvoice(orderIds, items); // Insert the invoice
-        await updateStockQuantity(items); // Update stock based on the invoice type
+            const response = await axios.post('https://backendalaahd.onrender.com/api/invoices', invoiceData); // Adjust your endpoint
+            console.log("Invoice inserted successfully:", response.data);
+        } catch (error) {
+            console.error("Error inserting invoice:", error);
+            throw new Error("Failed to insert invoice");
+        }
+    };
 
-        // Show success message
-        alert("Facture, commandes créées, et stock mis à jour avec succès");
+    const handleSubmit = async () => {
+        try {
+            const orderIds = await insertOrders(items); // Insert orders and get IDs
+            await insertInvoice(orderIds, items); // Insert the invoice
+            await updateStockQuantity(items); // Update stock based on the invoice type
 
-        // Reset the component state
-        setItems([
-            {
-                _id: 1,
-                title: '',
-                description: '',
-                rate: 0,
-                quantity: 0,
-                price: 0,
-                productId: '',
-                Refcolor: '',
-                colors: [],
-                searchTerm: '',
-                profit: 0,
-                customerId: customerId, // Preserve the customerId
-            },
-        ]);
-        setInvoiceRef(generateInvoiceRef()); // Generate a new invoice reference
-        setTax(0); // Reset tax
-        setPromotion(0); // Reset promotion
-        setTransportPrice(0); // Reset transport price
-        setOrdredDate(''); // Reset ordered date
-        setDueDate(''); // Reset due date
-        setStatus('pending'); // Reset status
+            // Show success message
+            alert("Facture, commandes créées, et stock mis à jour avec succès");
 
-    } catch (error) {
-        console.error("Error during submission:", error);
-        alert("There was an error processing the invoice. Please try again.");
-    }
-};
+            // Reset the component state
+            setItems([
+                {
+                    _id: 1,
+                    title: '',
+                    description: '',
+                    rate: 0,
+                    quantity: 0,
+                    price: 0,
+                    productId: '',
+                    Refcolor: '',
+                    colors: [],
+                    searchTerm: '',
+                    profit: 0,
+                    customerId: customerId, // Preserve the customerId
+                },
+            ]);
+            setInvoiceRef(generateInvoiceRef()); // Generate a new invoice reference
+            setTax(0); // Reset tax
+            setPromotion(0); // Reset promotion
+            setTransportPrice(0); // Reset transport price
+            setOrdredDate(''); // Reset ordered date
+            setDueDate(''); // Reset due date
+            setStatus('pending'); // Reset status
+
+        } catch (error) {
+            console.error("Error during submission:", error);
+            alert("There was an error processing the invoice. Please try again.");
+        }
+    };
 
 
 
