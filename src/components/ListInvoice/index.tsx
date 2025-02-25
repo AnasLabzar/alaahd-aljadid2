@@ -43,56 +43,56 @@ const ListInvoice = () => {
     const [selectedStatus, setSelectedStatus] = useState("all");
     const [startDate, setStartDate] = useState<Date | null>(null);
     const [endDate, setEndDate] = useState<Date | null>(null);
-    const [showModal, setShowModal] = useState(false);
     const [newRows, setNewRows] = useState<Set<string>>(new Set());
 
+    // Fetch invoices and related data
     const fetchInvoices = async () => {
-    setLoading(true);
-    try {
-        const invoiceResponse = await axios.get("https://backendalaahd.onrender.com/api/invoices");
-        const invoicesData = invoiceResponse.data;
+        setLoading(true);
+        try {
+            const invoiceResponse = await axios.get("https://backendalaahd.onrender.com/api/invoices");
+            const invoicesData = invoiceResponse.data;
 
-        if (Array.isArray(invoicesData)) {
-            setAllInvoices(invoicesData);
+            if (Array.isArray(invoicesData)) {
+                setAllInvoices(invoicesData);
 
-            // Fetch orders and users
-            const orderPromises = invoicesData.flatMap((invoice) =>
-                invoice.orderId.length > 0
-                    ? axios.get(`https://backendalaahd.onrender.com/api/orders/${invoice.orderId[0]}`)
-                    : []
-            );
+                // Fetch orders and users
+                const orderPromises = invoicesData.flatMap((invoice) =>
+                    invoice.orderId.length > 0
+                        ? axios.get(`https://backendalaahd.onrender.com/api/orders/${invoice.orderId[0]}`)
+                        : []
+                );
 
-            const customResponse = await axios.get("https://backendalaahd.onrender.com/api/users/role/custom");
-            const fournResponse = await axios.get("https://backendalaahd.onrender.com/api/users/role/fourn");
+                const customResponse = await axios.get("https://backendalaahd.onrender.com/api/users/role/custom");
+                const fournResponse = await axios.get("https://backendalaahd.onrender.com/api/users/role/fourn");
 
-            const allUsers = [...customResponse.data, ...fournResponse.data];
-            const userMap = allUsers.reduce((acc, user) => {
-                acc[user._id] = user;
-                return acc;
-            }, {} as { [key: string]: User });
+                const allUsers = [...customResponse.data, ...fournResponse.data];
+                const userMap = allUsers.reduce((acc, user) => {
+                    acc[user._id] = user;
+                    return acc;
+                }, {} as { [key: string]: User });
 
-            const orderResponses = await Promise.all(orderPromises);
-            const orderData = orderResponses.reduce((acc, res) => {
-                acc[res.data._id] = res.data;
-                return acc;
-            }, {} as { [key: string]: Order });
+                const orderResponses = await Promise.all(orderPromises);
+                const orderData = orderResponses.reduce((acc, res) => {
+                    acc[res.data._id] = res.data;
+                    return acc;
+                }, {} as { [key: string]: Order });
 
-            setOrders(orderData);
-            setUsers(userMap);
+                setOrders(orderData);
+                setUsers(userMap);
 
-            // Check for new invoices
-            const newInvoiceIds = invoicesData
-                .filter((invoice) => isWithinLast10Minutes(invoice.fetchedAt))
-                .map((invoice) => invoice._id);
+                // Check for new invoices
+                const newInvoiceIds = invoicesData
+                    .filter((invoice) => isWithinLast10Minutes(invoice.fetchedAt))
+                    .map((invoice) => invoice._id);
 
-            setNewRows(new Set(newInvoiceIds));
+                setNewRows(new Set(newInvoiceIds));
+            }
+        } catch (error) {
+            console.error("Error fetching data:", error);
+        } finally {
+            setLoading(false);
         }
-    } catch (error) {
-        console.error("Error fetching data:", error);
-    } finally {
-        setLoading(false);
-    }
-};
+    };
 
     // Auto-refresh every 60 seconds
     useEffect(() => {
@@ -145,7 +145,9 @@ const ListInvoice = () => {
 
     // Helper functions
     const formatFetchedAtDate = (fetchedAt: string) => {
+        if (!fetchedAt) return "N/A"; // Handle missing date
         const date = new Date(fetchedAt);
+        if (isNaN(date.getTime())) return "N/A"; // Handle invalid date
         return date.toLocaleDateString("en-GB", { day: "2-digit", month: "short" });
     };
 
