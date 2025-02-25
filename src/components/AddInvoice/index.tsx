@@ -332,15 +332,15 @@ const AddInvoice = () => {
         }
     }
 
-    const generateOrderRef = (): string => {
+    const generateOrderRef = (customerId: string): string => {
         const date = new Date();
         const day = String(date.getDate()).padStart(2, '0');
         const month = String(date.getMonth() + 1).padStart(2, '0');
         const year = String(date.getFullYear());
-        const randomNum = Math.floor(10 + Math.random() * 90); // Generates a 2-digit random number
-
-        // Construct the order reference
-        return `ORD-BL${randomNum}-${day}${month}${year}-${randomNum}`;
+        const randomNum = Math.floor(1000 + Math.random() * 9000); // Generates a 4-digit random number
+    
+        // Construct the order reference with customer ID
+        return `INV-${customerId}-${year}${month}${day}-${randomNum}`;
     };
 
     const calculateTotalProfit = (profit: number, quantity: number) => {
